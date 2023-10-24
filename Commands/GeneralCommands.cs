@@ -19,12 +19,12 @@ public class GeneralCommands : BaseCommandModule
     [Command("verify")]
     public async Task HelpVerifyCommand(CommandContext ctx, DiscordMember targetMember)
     {
-        if (ctx.Channel != DiscordService.Instance.HelpVerifyChannel)
+        if (ctx.Channel != _discordService.HelpVerifyChannel)
             return;
 
         await ctx.RespondAsync(
             string.Format("Hello, <@{0}>! Check out the <#{1}> channel for detailed steps on how to join our roleplay server and on how to obtain access to our member-only channels.",
-            ctx.User.Id, DiscordService.Instance.VerificationChannel.Id));
+            ctx.User.Id, _discordService.VerificationChannel.Id));
     }
 
     [Command("remove-read-only")]
