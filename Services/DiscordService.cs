@@ -11,11 +11,10 @@ namespace app.Services;
 
 public class DiscordService
 {
-    public static DiscordService Instance { get; set; }
-
     public DiscordClient Client { get; private set; }
     public DiscordGuild Guild { get; private set; }
-    private DiscordSettings _settings;
+    private readonly DiscordSettings _settings;
+    private readonly ServerApiSettings _serverApiSettings;
 
     // Fix this
     public DiscordRole MemberRole { get; private set; }
@@ -38,9 +37,9 @@ public class DiscordService
     public DiscordChannel AccountCreationChannel { get; private set; }
     public DiscordChannel BanNotificationsChannel { get; private set; }
 
-    public DiscordService(IOptions<DiscordSettings> discordSettings)
+    public DiscordService(IOptions<DiscordSettings> discordSettings, IOptions<ServerApiSettings> settings)
     {
-        Instance = this;
+        _serverApiSettings = settings.Value;
         _settings = discordSettings.Value;
     }
 
@@ -64,7 +63,7 @@ public class DiscordService
                 "!"
             },
             Services = new ServiceCollection()
-                .AddRefitServices()
+                .AddRefitServices(_serverApiSettings)
                 .AddSingleton(this)
                 .BuildServiceProvider()
         };

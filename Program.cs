@@ -4,8 +4,13 @@ using app;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRefitServices();
+var serverApiSettings = new ServerApiSettings();
+builder.Configuration.GetSection(nameof(ServerApiSettings)).Bind(serverApiSettings);
+
 builder.Services.Configure<DiscordSettings>(options => builder.Configuration.GetSection(nameof(DiscordSettings)).Bind(options));
+builder.Services.Configure<ServerApiSettings>(options => builder.Configuration.GetSection(nameof(ServerApiSettings)).Bind(options));
+
+builder.Services.AddRefitServices(serverApiSettings);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
