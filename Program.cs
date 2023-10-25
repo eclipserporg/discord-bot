@@ -1,12 +1,7 @@
 using app.Services;
 using app.Settings;
 using app;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.OpenApi.Models;
 using app.Models;
-using Microsoft.Extensions.Configuration;
 using app.Middlewares;
 using Microsoft.AspNetCore.Authentication;
 
@@ -22,7 +17,6 @@ builder.Services.Configure<Credentials>(options => builder.Configuration.GetSect
 builder.Services.AddRefitServices(serverApiSettings);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<DiscordService>();
 builder.Services.AddSingleton<LoginService>();
 builder.Services.AddSingleton<RunnerService>();
@@ -31,29 +25,7 @@ builder.Services.AddHostedService(provider => provider.GetService<RunnerService>
 builder.Services.AddAuthentication("BasicAuthentication")
         .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
-    c.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "basic",
-        In = ParameterLocation.Header,
-        Description = "Basic Authorization header."
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" }
-            },
-            new string[] { }
-        }
-    });
-});
-
+builder.Services.AddSwaggerServices();
 
 var app = builder.Build();
 
@@ -69,6 +41,16 @@ await app.Services.GetService<DiscordService>().Start();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    if (!context.Connection.RemoteIpAddress.Equals(context.Connection.LocalIpAddress))
+    {
+        context.Response.StatusCode = 403;
+        return;
+    }
+    await next.Invoke();
+});
 
 app.MapControllers();
 app.Run();
