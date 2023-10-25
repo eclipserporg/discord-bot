@@ -1,11 +1,13 @@
 using app.Apis;
 using app.Models;
 using app.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace app.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]/[action]")]
     public class DiscordController : ControllerBase
     {

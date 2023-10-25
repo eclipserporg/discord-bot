@@ -1,4 +1,5 @@
-﻿using Refit;
+﻿using app.Models;
+using Refit;
 
 namespace app.Apis;
 
@@ -29,5 +30,5 @@ public interface IServerDiscordApi
     Task<bool> PostBan(string channel, ulong senderId, string senderName, ulong targetId, string targetName, string reason);
 
     [Post("/login")]
-    Task<(bool, string)> PostLogin(string name, ulong id, string username, string discriminator, string avatarurl, string password);
+    Task<ResponsePairDto> PostLogin(string name, ulong id, string username, string discriminator, string avatarurl, string password);
 }

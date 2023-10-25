@@ -1,10 +1,12 @@
 using app.Services;
 using DSharpPlus.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace app.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]/[action]")]
     public class PresenceController : ControllerBase
     {

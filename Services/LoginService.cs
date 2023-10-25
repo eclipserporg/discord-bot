@@ -38,14 +38,14 @@ public class LoginService
             return;
         }
 
-        var (status, response) = await _serverDiscordApi.PostLogin(name, discordMember.Id, discordMember.Username, discordMember.Discriminator, discordMember.AvatarUrl, password);
+        var response = await _serverDiscordApi.PostLogin(name, discordMember.Id, discordMember.Username, discordMember.Discriminator, discordMember.AvatarUrl, password);
 
-        if(status)
+        if(response.Status)
         {
             await discordMember.GrantRoleAsync(_discordService.MemberRole);
         }
-        
-        await e.Channel.SendMessageAsync(response);
+
+        await e.Message.RespondAsync(response.Message);
     }
 
     private async Task OnPrivateMessage(MessageCreateEventArgs e)
@@ -62,7 +62,7 @@ public class LoginService
 
             if (index == -1)
             {
-                await e.Channel.SendMessageAsync("Incorrect format! Write **!login USERNAME PASSWORD**");
+                await e.Message.RespondAsync("Incorrect format! Write **!login USERNAME PASSWORD**");
                 return;
             }
 
@@ -70,6 +70,10 @@ public class LoginService
             var password = input.Substring(index + 1, input.Length - index - 1);
 
             await HandleLoginCommand(e, accountName, password);
+        }
+        else
+        {
+            await e.Message.RespondAsync("Incorrect format! Write **!login USERNAME PASSWORD**");
         }
     }
 }
