@@ -1,9 +1,11 @@
 ﻿using app.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace app.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]/[action]")]
     public class FeedsController : ControllerBase
     {
@@ -14,7 +16,7 @@ namespace app.Controllers
         }
 
         [HttpPost(Name = "send")]
-        public async Task PostSend(string channel, [FromBody] string message)
+        public async Task PostSend(string channel, string message)
         {
             var discordChannel = channel switch
             {
