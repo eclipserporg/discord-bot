@@ -40,4 +40,4 @@ We appreciate any contributions to improve the bot, whether it's a bug fix, new 
 
 ## License
 
-MIT License. See `LICENSE` for details.
+GNU General Public License v3.0 . See `LICENSE` for details.
