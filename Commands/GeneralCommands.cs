@@ -3,6 +3,8 @@ using app.Services;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Serilog;
+
 namespace app.Commands;
 
 public class GeneralCommands : BaseCommandModule
@@ -21,10 +23,27 @@ public class GeneralCommands : BaseCommandModule
     {
         if (ctx.Channel != _discordService.HelpVerifyChannel)
             return;
+        Log.Information("HelpVerifyCommand");
 
         await ctx.RespondAsync(
             string.Format("Hello, <@{0}>! Check out the <#{1}> channel for detailed steps on how to join our roleplay server and on how to obtain access to our member-only channels.",
             ctx.User.Id, _discordService.VerificationChannel.Id));
+    }
+
+    [Command("pingserver")]
+    public async Task PingServerCommand(CommandContext ctx)
+    {
+        if (ctx.Channel != _discordService.CommandsChannel)
+            return;
+
+        Log.Information("PingServerCommand");
+
+        var response = await _serverDiscordApi.GetPing();
+
+        if(response)
+        {
+            Log.Information("PingServerCommand: Success");
+        }
     }
 
     [Command("remove-read-only")]
@@ -32,6 +51,7 @@ public class GeneralCommands : BaseCommandModule
     {
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
+        Log.Information("RemoveReadOnlyCommand");
 
         var senderMember = ctx.Member;
 
@@ -66,6 +86,7 @@ public class GeneralCommands : BaseCommandModule
     {
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
+        Log.Information("ListCommand");
 
         var message = "```\n";
         message += "!ban;user_id;reason\n";
@@ -87,6 +108,7 @@ public class GeneralCommands : BaseCommandModule
     {
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
+        Log.Information("ReadOnlyCommand");
 
         var senderMember = ctx.Member;
 
@@ -119,6 +141,7 @@ public class GeneralCommands : BaseCommandModule
     {
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
+        Log.Information("AppsCommand");
 
         var waitingIssuers = await _serverDiscordApi.GetApps();
         await ctx.RespondAsync(waitingIssuers);
@@ -127,6 +150,7 @@ public class GeneralCommands : BaseCommandModule
     [Command("ann")]
     public async Task AnnCommand(CommandContext ctx, string text)
     {
+        Log.Information("AnnCommand");
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
 
@@ -138,8 +162,8 @@ public class GeneralCommands : BaseCommandModule
     {
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
-
-        if(await _serverDiscordApi.PostSave())
+        Log.Information("SaveCommand");
+        if (await _serverDiscordApi.PostSave())
         {
             await ctx.RespondAsync("Saved to database!");
         }
@@ -154,6 +178,7 @@ public class GeneralCommands : BaseCommandModule
     {
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
+        Log.Information("KickCommand");
 
         var senderMember = ctx.Member;
 
@@ -180,6 +205,7 @@ public class GeneralCommands : BaseCommandModule
     {
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
+        Log.Information("BanCommand");
 
         var senderMember = ctx.Member;
 

@@ -2,6 +2,7 @@ using app.Models;
 using app.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace app.Controllers
 {
@@ -20,6 +21,7 @@ namespace app.Controllers
         [HttpGet(Name = "hasContentCreator")]
         public async Task<bool> GetHasContentCreator(ulong id)
         {
+            Log.Information("Get hasContentCreator");
             var member = await _discordService.Guild.GetMemberAsync(id);
 
             if(member == null)
@@ -31,6 +33,7 @@ namespace app.Controllers
         [HttpGet(Name = "user")]
         public async Task<DiscordUserDto?> GetUser(ulong id)
         {
+            Log.Information("Get user");
             var member = await _discordService.Guild.GetMemberAsync(id);
 
             if (member == null)
@@ -48,6 +51,7 @@ namespace app.Controllers
         [HttpPost(Name = "grantRole")]
         public async Task PostGrantRole(ulong id, string role)
         {
+            Log.Information("Post grantRole");
             var member = await _discordService.Guild.GetMemberAsync(id);
 
             if (member == null)
@@ -69,6 +73,7 @@ namespace app.Controllers
         [HttpPost(Name = "revokeRole")]
         public async Task PostRevokeRole(ulong id, string role)
         {
+            Log.Information("Post revokeRole");
             var member = await _discordService.Guild.GetMemberAsync(id);
 
             if (member == null)

@@ -1,6 +1,7 @@
 ﻿using app.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace app.Controllers
 {
@@ -18,6 +19,7 @@ namespace app.Controllers
         [HttpPost(Name = "send")]
         public async Task PostSend(string channel, string message)
         {
+            Log.Information("Post send");
             var discordChannel = channel switch
             {
                 nameof (_discordService.HelpVerifyChannel) => _discordService.HelpVerifyChannel,
