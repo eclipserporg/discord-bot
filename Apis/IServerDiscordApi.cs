@@ -23,6 +23,9 @@ public interface IServerDiscordApi
     [Post("/save")]
     Task<bool> PostSave();
 
+    [Get("/ping")]
+    Task<bool> GetPing();
+
     [Post("/kick")]
     Task<bool> PostKick(string channel, ulong senderId, string senderName, ulong targetId, string targetName, string reason);
 
