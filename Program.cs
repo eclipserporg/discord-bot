@@ -4,14 +4,10 @@ using app;
 using app.Models;
 using app.Middlewares;
 using Microsoft.AspNetCore.Authentication;
-using Serilog.Events;
 using Serilog;
-using Microsoft.AspNetCore.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
-builder.WebHost.UseUrls("http://*:7031");
-
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()

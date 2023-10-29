@@ -5,46 +5,45 @@ using Refit;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace app
+namespace app;
+
+public static class ServiceExtensions
 {
-    public static class ServiceExtensions
+    public static IServiceCollection AddRefitServices(this IServiceCollection collection, ServerApiSettings serverApiSettings)
     {
-        public static IServiceCollection AddRefitServices(this IServiceCollection collection, ServerApiSettings serverApiSettings)
+        collection.AddRefitClient<IServerDiscordApi>().ConfigureHttpClient(c =>
         {
-            collection.AddRefitClient<IServerDiscordApi>().ConfigureHttpClient(c =>
+            c.BaseAddress = new Uri(serverApiSettings.Url);
+            c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{serverApiSettings.Username}:{serverApiSettings.Password}")));
+        });
+
+        return collection;
+    }
+
+    public static IServiceCollection AddSwaggerServices(this IServiceCollection collection)
+    {
+        collection.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+            c.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
             {
-                c.BaseAddress = new Uri(serverApiSettings.Url);
-                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{serverApiSettings.Username}:{serverApiSettings.Password}")));
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "basic",
+                In = ParameterLocation.Header,
+                Description = "Basic Authorization header."
             });
-
-            return collection;
-        }
-
-        public static IServiceCollection AddSwaggerServices(this IServiceCollection collection)
-        {
-            collection.AddSwaggerGen(c =>
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
-                c.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
                 {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "basic",
-                    In = ParameterLocation.Header,
-                    Description = "Basic Authorization header."
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                    new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
+                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" }
+                    },
+                    Array.Empty<string>()
+                }
             });
-            return collection;
-        }
+        });
+        return collection;
     }
 }
