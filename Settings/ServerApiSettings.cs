@@ -1,9 +1,8 @@
-﻿namespace app.Settings
+﻿namespace app.Settings;
+
+public class ServerApiSettings
 {
-    public class ServerApiSettings
-    {
-        public string Url { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
+    public string Url { get; set; }
+    public string Username { get; set; }
+    public string Password { get; set; }
 }

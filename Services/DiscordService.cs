@@ -126,6 +126,20 @@ public class DiscordService
         Client.ClientErrored += OnClientError;
         Client.SocketErrored += OnSocketError;
         commands.CommandErrored += OnCommandError;
+
+        await SetPresence(ActivityType.Playing, "ECLIPSE Roleplay!");
+    }
+
+    public async Task SetPresence(ActivityType type, string message)
+    {
+        try
+        {
+            await Client.UpdateStatusAsync(new DiscordActivity(message, type));
+        }
+        catch
+        {
+            Log.Error("Failed to set presence");
+        }
     }
 
     private Task OnClientError(DiscordClient sender, ClientErrorEventArgs e)
