@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="DSharpPlus" Version="4.4.2" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.4.2" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.4" />
     <PackageReference Include="Refit" Version="7.0.0" />

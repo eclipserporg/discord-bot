@@ -3,11 +3,12 @@ using app.Services;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 using Serilog;
 
 namespace app.Commands;
 
-public class GeneralCommands : BaseCommandModule
+public class GeneralCommands : ApplicationCommandModule
 {
     private readonly IServerDiscordApi _serverDiscordApi;
     private readonly DiscordService _discordService;
@@ -18,23 +19,28 @@ public class GeneralCommands : BaseCommandModule
         _discordService = discordService;
     }
 
-    [Command("verify")]
-    public async Task HelpVerifyCommand(CommandContext ctx, DiscordMember targetMember)
+    [SlashCommand("verify", "help user with verification.")]
+    public async Task HelpVerifyCommand(InteractionContext ctx)
     {
         if (ctx.Channel != _discordService.HelpVerifyChannel)
+        {
+            await ctx.CreateResponseAsync("Invalid channel.");
             return;
-        Log.Information("HelpVerifyCommand");
+        }
 
-        await ctx.RespondAsync(
-            string.Format("Hello, <@{0}>! Check out the <#{1}> channel for detailed steps on how to join our roleplay server and on how to obtain access to our member-only channels.",
-            ctx.User.Id, _discordService.VerificationChannel.Id));
+        Log.Information("HelpVerifyCommand");
+        var message = $"Hello, {ctx.User.Mention}! Check out the ${_discordService.VerificationChannel.Mention} channel for detailed steps on how to join our roleplay server and on how to obtain access to our member-only channels.";
+        await ctx.CreateResponseAsync(message);
     }
 
-    [Command("pingserver")]
-    public async Task PingServerCommand(CommandContext ctx)
+    [SlashCommand("pingserver", "ping server")]
+    public async Task PingServerCommand(InteractionContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
+        {
+            await ctx.CreateResponseAsync("Invalid channel.");
             return;
+        }
 
         Log.Information("PingServerCommand");
 
@@ -43,68 +49,57 @@ public class GeneralCommands : BaseCommandModule
         if(response)
         {
             Log.Information("PingServerCommand: Success");
+            await ctx.CreateResponseAsync("Server is online!");
         }
     }
 
-    [Command("remove-read-only")]
-    public async Task RemoveReadOnlyCommand(CommandContext ctx, DiscordMember targetMember)
+    [SlashCommand("remove-read-only", "remove read only from user")]
+    public async Task RemoveReadOnlyCommand(InteractionContext ctx, [Option("target", "target member to remove read only")] DiscordUser targetMember)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
+        {
+            await ctx.CreateResponseAsync("Invalid channel.");
             return;
+        }
         Log.Information("RemoveReadOnlyCommand");
 
         var senderMember = ctx.Member;
 
         if (targetMember == null || senderMember == null)
         {
-            await ctx.RespondAsync("```SUCH MEMBERS DO NOT EXIST```");
+            await ctx.CreateResponseAsync("```SUCH MEMBERS DO NOT EXIST```");
             return;
         }
 
         if (targetMember.Id == senderMember.Id)
         {
-            await ctx.RespondAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
+            await ctx.CreateResponseAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
             return;
         }
 
-        if (targetMember.Roles.All(x => x.Id != _discordService.ReadOnlyRole.Id))
+        var member = await _discordService.Guild.GetMemberAsync(targetMember.Id);
+
+        if (member.Roles.All(x => x.Id != _discordService.ReadOnlyRole.Id))
         {
-            await ctx.RespondAsync("```TARGET DOESN'T HAVE READ-ONLY ROLE```");
+            await ctx.CreateResponseAsync("```TARGET DOESN'T HAVE READ-ONLY ROLE```");
             return;
         }
 
         var result = await _serverDiscordApi.PostRemoveReadOnly(nameof(_discordService.CommandsChannel), ctx.User.Id, ctx.User.Username, targetMember.Id, targetMember.Username);
 
+
         if(result)
         {
-            await targetMember.RevokeRoleAsync(_discordService.ReadOnlyRole, "Removed read-only");
-        }
-    }
-
-    [Command("commands")]
-    public async Task ListCommand(CommandContext ctx)
-    {
-        if (ctx.Channel != _discordService.CommandsChannel)
+            await member.RevokeRoleAsync(_discordService.ReadOnlyRole, "Removed read-only");
+            await ctx.CreateResponseAsync("Removed read-only role");
             return;
-        Log.Information("ListCommand");
+        }
 
-        var message = "```\n";
-        message += "!ban;user_id;reason\n";
-        message += "!kick;user_id;reason\n";
-        message += "!read-only;user_id;reason\n";
-        message += "!remove-read-only;user_id\n";
-        message += "!save\n";
-        message += "!apps\n";
-        message += "!ann;text\n";
-        message += "!restart\n";
-        message += "!quizstats\n";
-        message += "```";
-
-        await ctx.RespondAsync(message);
+        await ctx.CreateResponseAsync("Failed to remove read-only role");
     }
 
-    [Command("read-only")]
-    public async Task ReadOnlyCommand(CommandContext ctx, DiscordMember targetMember, string reason)
+    [SlashCommand("read-only", "put read only on user")]
+    public async Task ReadOnlyCommand(InteractionContext ctx, [Option("target", "target member")] DiscordUser targetMember, [Option("reason", "reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
             return;
@@ -114,116 +109,147 @@ public class GeneralCommands : BaseCommandModule
 
         if (targetMember == null || senderMember == null)
         {
-            await ctx.RespondAsync("```SUCH MEMBERS DO NOT EXIST```");
+            await ctx.CreateResponseAsync("```SUCH MEMBERS DO NOT EXIST```");
             return;
         }
 
         if (targetMember.Id == senderMember.Id)
         {
-            await ctx.RespondAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
+            await ctx.CreateResponseAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
             return;
         }
 
-        if (targetMember.Roles.Any(x => x.Id == _discordService.ReadOnlyRole.Id))
+        var member = await _discordService.Guild.GetMemberAsync(targetMember.Id);
+        if (member.Roles.Any(x => x.Id == _discordService.ReadOnlyRole.Id))
         {
-            await ctx.RespondAsync("```TARGET ALREADY HAS READ-ONLY ROLE```");
+            await ctx.CreateResponseAsync("```TARGET ALREADY HAS READ-ONLY ROLE```");
             return;
         }
 
         if(await _serverDiscordApi.PostReadOnly(nameof(_discordService.CommandsChannel), ctx.User.Id, ctx.User.Username, targetMember.Id, targetMember.Username, reason))
         {
-            await targetMember.GrantRoleAsync(_discordService.ReadOnlyRole);
+            await member.GrantRoleAsync(_discordService.ReadOnlyRole);
+            await ctx.CreateResponseAsync("Added read-only role");
+            return;
         }
+
+        await ctx.CreateResponseAsync("Failed to add read-only role");
     }
 
-    [Command("apps")]
-    public async Task AppsCommand(CommandContext ctx)
+    [SlashCommand("apps", "get active applications")]
+    public async Task AppsCommand(InteractionContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
+        {
+            await ctx.CreateResponseAsync("Invalid channel.");
             return;
+        }
         Log.Information("AppsCommand");
 
         var waitingIssuers = await _serverDiscordApi.GetApps();
-        await ctx.RespondAsync(waitingIssuers);
+        await ctx.CreateResponseAsync(waitingIssuers);
     }
 
-    [Command("ann")]
-    public async Task AnnCommand(CommandContext ctx, string text)
+    [SlashCommand("ann", "post announcement in server")]
+    public async Task AnnCommand(InteractionContext ctx, [Option("announcement", "announcement to post on the server")] string text)
     {
         Log.Information("AnnCommand");
         if (ctx.Channel != _discordService.CommandsChannel)
+        {
+            await ctx.CreateResponseAsync("Invalid channel.");
             return;
+        }
 
         await _serverDiscordApi.PostAnnouncement(text);
+        await ctx.CreateResponseAsync("Announcement sent!");
     }
 
-    [Command("save")]
-    public async Task SaveCommand(CommandContext ctx)
+    [SlashCommand("save", "save server state")]
+    public async Task SaveCommand(InteractionContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
+        {
+            await ctx.CreateResponseAsync("Invalid channel.");
             return;
+        }
         Log.Information("SaveCommand");
+
         if (await _serverDiscordApi.PostSave())
         {
-            await ctx.RespondAsync("Saved to database!");
+            await ctx.CreateResponseAsync("Saved to database!");
         }
         else
         {
-            await ctx.RespondAsync("Failed to save to database!");
+            await ctx.CreateResponseAsync("Failed to save to database!");
         }
     }
 
-    [Command("kick")]
-    public async Task KickCommand(CommandContext ctx, DiscordMember targetMember, string reason)
+    [SlashCommand("kick", "kick user")]
+    public async Task KickCommand(InteractionContext ctx, [Option("target", "target member")] DiscordUser targetMember, [Option("reason", "reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
+        {
+            await ctx.CreateResponseAsync("Invalid channel.");
             return;
+        }
         Log.Information("KickCommand");
 
         var senderMember = ctx.Member;
 
         if (targetMember == null || senderMember == null)
         {
-            await ctx.RespondAsync("```SUCH MEMBERS DO NOT EXIST```");
+            await ctx.CreateResponseAsync("```SUCH MEMBERS DO NOT EXIST```");
             return;
         }
 
         if (targetMember.Id == senderMember.Id)
         {
-            await ctx.RespondAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
+            await ctx.CreateResponseAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
             return;
         }
 
         if(await _serverDiscordApi.PostKick(nameof(_discordService.CommandsChannel), ctx.User.Id, ctx.User.Username, targetMember.Id, targetMember.Username, reason))
         {
-            await targetMember.RemoveAsync(reason);
+            var member = await _discordService.Guild.GetMemberAsync(targetMember.Id);
+            await member.RemoveAsync(reason);
+            await ctx.CreateResponseAsync("Kicked user");
+            return;
         }
+
+        await ctx.CreateResponseAsync("Failed to kick user");
     }
 
-    [Command("ban")]
-    public async Task BanCommand(CommandContext ctx, DiscordMember targetMember, string reason)
+    [SlashCommand("ban", "ban user")]
+    public async Task BanCommand(InteractionContext ctx, [Option("target", "target member")] DiscordUser targetMember, [Option("reason", "reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
+        {
+            await ctx.CreateResponseAsync("Invalid channel.");
             return;
+        }
         Log.Information("BanCommand");
 
         var senderMember = ctx.Member;
 
         if (targetMember == null || senderMember == null)
         {
-            await ctx.RespondAsync("```SUCH MEMBERS DO NOT EXIST```");
+            await ctx.CreateResponseAsync("```SUCH MEMBERS DO NOT EXIST```");
             return;
         }
 
         if (targetMember.Id == senderMember.Id)
         {
-            await ctx.RespondAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
+            await ctx.CreateResponseAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
             return;
         }
 
         if(await _serverDiscordApi.PostBan(nameof(_discordService.CommandsChannel), ctx.User.Id, ctx.User.Username, targetMember.Id, targetMember.Username, reason))
         {
-            await targetMember.BanAsync(0, reason);
+            await _discordService.Guild.BanMemberAsync(targetMember.Id, 0, reason);
+            await ctx.CreateResponseAsync("Banned user");
+            return;
         }
+
+        await ctx.CreateResponseAsync("Failed to ban user");
     }
 }
