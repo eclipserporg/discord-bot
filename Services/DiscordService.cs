@@ -6,6 +6,7 @@ using app.Commands;
 using Serilog;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Options;
+using DSharpPlus.SlashCommands;
 
 namespace app.Services;
 
@@ -56,21 +57,18 @@ public class DiscordService
 
         Client = new DiscordClient(configuration);
 
-        var nextConfiguration = new CommandsNextConfiguration()
+        var slashConfig = new SlashCommandsConfiguration()
         {
-            StringPrefixes = new[]
-            {
-                "!"
-            },
             Services = new ServiceCollection()
                 .AddRefitServices(_serverApiSettings)
                 .AddSingleton(this)
                 .BuildServiceProvider()
         };
 
-        var commands = Client.UseCommandsNext(nextConfiguration);
+        var slashCommands = Client.UseSlashCommands(slashConfig);
 
-        commands.RegisterCommands<GeneralCommands>();
+        slashCommands.RegisterCommands<GeneralCommands>();
+        slashCommands.RegisterCommands<RestartCommands>();
 
         await Client.InitializeAsync();
         await Client.ConnectAsync();
@@ -125,7 +123,7 @@ public class DiscordService
 
         Client.ClientErrored += OnClientError;
         Client.SocketErrored += OnSocketError;
-        commands.CommandErrored += OnCommandError;
+        //commands.CommandErrored += OnCommandError;
 
         await SetPresence(ActivityType.Playing, "ECLIPSE Roleplay!");
     }
