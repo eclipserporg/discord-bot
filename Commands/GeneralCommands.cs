@@ -29,7 +29,7 @@ public class GeneralCommands : ApplicationCommandModule
         }
 
         Log.Information("HelpVerifyCommand");
-        var message = $"Hello, {ctx.User.Mention}! Check out the ${_discordService.VerificationChannel.Mention} channel for detailed steps on how to join our roleplay server and on how to obtain access to our member-only channels.";
+        var message = $"Hello, {ctx.User.Mention}! Check out the {_discordService.VerificationChannel.Mention} channel for detailed steps on how to join our roleplay server and on how to obtain access to our member-only channels.";
         await ctx.CreateResponseAsync(message);
     }
 
