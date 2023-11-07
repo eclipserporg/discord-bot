@@ -30,13 +30,15 @@ public class RunnerService : BackgroundService
 
                 if(!status)
                 {
-                    throw new Exception("Server is down");
+                    throw new Exception("Server is down.");
                 }
             }
-            catch(Exception e)
+            // A simplified, more dev-friendly error if we hit a rather standard error.
+            catch(HttpRequestException httpException)
             {
                 await _discordService.SetPresence(ActivityType.Watching, "server status: DOWN !");
-                Log.Error(e, "RunnerService");
+                // A warning is more accurate to something that may cause issues if not resolved.
+                Log.Warning($"RunnerService: Caught HttpRequestException from serverApi.GetPing: {httpException.Message}", "RunnerService");
             }
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
