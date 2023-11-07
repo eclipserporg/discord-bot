@@ -38,7 +38,7 @@ public class RunnerService : BackgroundService
             {
                 await _discordService.SetPresence(ActivityType.Watching, "Server status: DOWN !");
                 // A warning is more accurate to something that may cause issues if not resolved.
-                Log.Warning($"RunnerService: Caught HttpRequestException from initial serverApi.GetPing: {httpException.Message}", "RunnerService");
+                Log.Warning($"RunnerService: Caught HttpRequestException from serverApi.GetPing: {httpException.Message}", "RunnerService");
             }
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
