@@ -40,7 +40,7 @@ public class RunnerService : BackgroundService
                 // A warning is more accurate to something that may cause issues if not resolved.
                 Log.Warning($"RunnerService: Caught HttpRequestException from serverApi.GetPing: {httpException.Message}", "RunnerService");
             }
-            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
         Console.WriteLine("Running...");
     }
