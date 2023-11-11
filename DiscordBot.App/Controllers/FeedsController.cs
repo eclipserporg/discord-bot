@@ -11,6 +11,7 @@ namespace DiscordBot.Controllers;
 public class FeedsController : ControllerBase
 {
     private readonly DiscordService _discordService;
+    private const int _maxMessageLength = 2000;
     public FeedsController(DiscordService discordService)
     {
         _discordService = discordService;
@@ -38,6 +39,27 @@ public class FeedsController : ControllerBase
             nameof (_discordService.BanNotificationsChannel) => _discordService.BanNotificationsChannel,
             _ => throw new Exception("Invalid channel name")
         };
+
+        if (message.Length > _maxMessageLength)
+        {
+            var messageParts = message.Split(" ");
+
+            var currentMessage = string.Empty;
+
+            foreach (var messagePart in messageParts)
+            {
+                if (currentMessage.Length + messagePart.Length > _maxMessageLength)
+                {
+                    await _discordService.Client.SendMessageAsync(discordChannel, currentMessage);
+                    currentMessage = string.Empty;
+                }
+
+                currentMessage += messagePart + " ";
+            }
+
+            return;
+        }
+
 
         await _discordService.Client.SendMessageAsync(discordChannel, message);
     }
