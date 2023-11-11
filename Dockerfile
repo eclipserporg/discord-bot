@@ -7,16 +7,17 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["app.csproj", "."]
-RUN dotnet restore "./app.csproj"
 COPY . .
+
+RUN dotnet restore "./DiscordBot.App/DiscordBot.App.csproj"
+
 WORKDIR "/src/."
-RUN dotnet build "app.csproj" -c Release -o /app/build
+RUN dotnet build "./DiscordBot.App/DiscordBot.App.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "app.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./DiscordBot.App/DiscordBot.App.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "app.dll"]
+ENTRYPOINT ["dotnet", "DiscordBot.App.dll"]
