@@ -1,5 +1,7 @@
+using DiscordBot.Data.Models;
 using DiscordBot.Models;
 using DiscordBot.Services;
+using DSharpPlus.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
@@ -90,5 +92,38 @@ public class DiscordController : ControllerBase
         };
 
         await member.RevokeRoleAsync(discordRole);
+    }
+
+    [HttpPost(Name = "updateMemberRoles")]
+    public async Task PostUpdateMemberRoles(DiscordMemberRolesDto memberRoles)
+    {
+        Log.Information("Post updateMemberRoles");
+        var members = await _discordService.Guild.GetAllMembersAsync();
+
+        if (members == null)
+            return;
+
+        foreach (var member in members)
+        {
+            var hasVIP = memberRoles.MemberRolesVIP.TryGetValue(member.Id, out var vipId);
+
+            foreach (var role in member.Roles)
+            {
+                if (memberRoles.RolesVIP.Contains(role.Id))
+                {
+                    if (!hasVIP|| role.Id != vipId)
+                    {
+                        await member.RevokeRoleAsync(role);
+                    }
+                }
+            }
+
+            if (hasVIP && !member.Roles.Any((role) => role.Id == vipId))
+            {
+                var role = _discordService.Guild.GetRole(vipId);
+                if (role != null)
+                    await member.GrantRoleAsync(role);
+            }
+        }
     }
 }
