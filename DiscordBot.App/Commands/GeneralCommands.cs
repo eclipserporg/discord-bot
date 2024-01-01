@@ -253,7 +253,7 @@ public class GeneralCommands : ApplicationCommandModule
         await ctx.CreateResponseAsync("Failed to ban user");
     }
     [SlashCommand("ticket", "support")]
-    public async Task SupportCommand(InteractionContext ctx)
+    public async Task TicketCommand(InteractionContext ctx)
     {
       Log.Information("TicketCommand");
       var message = $"Hello! For general inquiries, verification support, or technical issues, check out the {_discordService.General-supportChannel.Mention}, {_discordService.Technical-supportChannel.Mention}, or {_discordService.Verification-supportChannel.Mention} channels for support and useful links. If your issue does not get resolved, create a ticket using any of these channels.";
