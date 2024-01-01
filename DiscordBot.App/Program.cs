@@ -28,7 +28,7 @@ builder.Services.AddSingleton<DiscordService>();
 builder.Services.AddSingleton<LoginService>();
 builder.Services.AddSingleton<RunnerService>();
 builder.Services.AddSingleton<GuildJoinService>();
-builder.Services.AddHostedService(provider => provider.GetService<RunnerService>());
+builder.Services.AddHostedService(provider => provider.GetRequiredService<RunnerService>());
 
 builder.Services.AddAuthentication("BasicAuthentication")
         .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
@@ -44,7 +44,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-await app.Services.GetService<DiscordService>().Start();
+await app.Services.GetRequiredService<DiscordService>().Start();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -52,7 +52,7 @@ app.UseAuthorization();
 
 app.Use(async (context, next) =>
 {
-    if (!context.Connection.RemoteIpAddress.Equals(context.Connection.LocalIpAddress))
+    if (context.Connection.RemoteIpAddress == null || !context.Connection.RemoteIpAddress.Equals(context.Connection.LocalIpAddress))
     {
         context.Response.StatusCode = 403;
         return;
