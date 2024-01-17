@@ -105,22 +105,32 @@ public class DiscordController : ControllerBase
 
         foreach (var member in members)
         {
-            var hasVIP = memberRoles.MemberRolesVIP.TryGetValue(member.Id, out var vipId);
+            var hasVIP = memberRoles.MemberRolesVIP.TryGetValue(member.Id, out var roleVIP);
+            var hasDonator = memberRoles.MemberRolesDonator.TryGetValue(member.Id, out var roleDonator);
 
             foreach (var role in member.Roles)
             {
-                if (memberRoles.RolesVIP.Contains(role.Id))
+                if (memberRoles.RolesVIP.Contains(role.Id) && (!hasVIP || role.Id != roleVIP))
                 {
-                    if (!hasVIP|| role.Id != vipId)
-                    {
-                        await member.RevokeRoleAsync(role);
-                    }
+                    await member.RevokeRoleAsync(role);
+                }
+
+                if (memberRoles.RolesDonator.Contains(role.Id) && (!hasDonator || role.Id != roleDonator))
+                {
+                    await member.RevokeRoleAsync(role);
                 }
             }
 
-            if (hasVIP && !member.Roles.Any((role) => role.Id == vipId))
+            if (hasVIP && !member.Roles.Any((role) => role.Id == roleVIP))
             {
-                var role = _discordService.Guild.GetRole(vipId);
+                var role = _discordService.Guild.GetRole(roleVIP);
+                if (role != null)
+                    await member.GrantRoleAsync(role);
+            }
+
+            if (hasDonator && !member.Roles.Any((role) => role.Id == roleDonator))
+            {
+                var role = _discordService.Guild.GetRole(roleDonator);
                 if (role != null)
                     await member.GrantRoleAsync(role);
             }
