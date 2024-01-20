@@ -58,7 +58,7 @@ public class LoginService
         if (trimmed.StartsWith("!login"))
         {
             var input = trimmed.Remove(0, 7);
-            var parts = input.Split(', ');
+            var parts = input.Split(", ");
 
             if (parts.Length < 2)
             {
