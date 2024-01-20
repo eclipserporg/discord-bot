@@ -58,22 +58,22 @@ public class LoginService
         if (trimmed.StartsWith("!login"))
         {
             var input = trimmed.Remove(0, 7);
-            var index = input.IndexOf(' ');
+            var parts = input.Split(', ');
 
-            if (index == -1)
+            if (parts.Length < 2)
             {
-                await e.Message.RespondAsync("Incorrect format! Write **!login USERNAME PASSWORD**");
+                await e.Message.RespondAsync("Incorrect format! Write **!login USERNAME, PASSWORD**");
                 return;
             }
 
-            var accountName = input[..index];
-            var password = input.Substring(index + 1, input.Length - index - 1);
+            var accountName = parts[0];
+            var password = parts[1];
 
             await HandleLoginCommand(e, accountName, password);
         }
         else
         {
-            await e.Message.RespondAsync("Incorrect format! Write **!login USERNAME PASSWORD**");
+            await e.Message.RespondAsync("Incorrect format! Write **!login USERNAME, PASSWORD**");
         }
     }
 }
