@@ -7,15 +7,13 @@ namespace DiscordBot.Services;
 public class RunnerService : BackgroundService
 {
     private readonly DiscordService _discordService;
-    private readonly LoginService _loginService;
     private readonly GuildJoinService _guildJoinService;
     private readonly IServerDiscordApi _serverApi;
 
 
-    public RunnerService(DiscordService discordService, LoginService loginService, GuildJoinService guildJoinService, IServerDiscordApi serverApi)
+    public RunnerService(DiscordService discordService, GuildJoinService guildJoinService, IServerDiscordApi serverApi)
     {
         _discordService = discordService;
-        _loginService = loginService;
         _guildJoinService = guildJoinService;
         _serverApi = serverApi;
     }

@@ -66,10 +66,10 @@ public class DiscordService
         };
 
         var slashCommands = Client.UseSlashCommands(slashConfig);
-
+        slashCommands.RegisterCommands<AuthenticationCommands>();
         slashCommands.RegisterCommands<GeneralCommands>();
         slashCommands.RegisterCommands<RestartCommands>();
-
+        
         await Client.InitializeAsync();
         await Client.ConnectAsync();
 
