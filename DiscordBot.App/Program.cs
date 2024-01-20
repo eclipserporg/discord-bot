@@ -25,7 +25,6 @@ builder.Services.AddRefitServices(serverApiSettings);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<DiscordService>();
-builder.Services.AddSingleton<LoginService>();
 builder.Services.AddSingleton<RunnerService>();
 builder.Services.AddSingleton<GuildJoinService>();
 builder.Services.AddHostedService(provider => provider.GetService<RunnerService>());
