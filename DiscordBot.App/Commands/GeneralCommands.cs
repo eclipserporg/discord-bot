@@ -36,9 +36,9 @@ public class GeneralCommands : ApplicationCommandModule
     [SlashCommand("pingserver", "ping server")]
     public async Task PingServerCommand(InteractionContext ctx)
     {
-        if (ctx.Channel != _discordService.CommandsChannel)
+        if (!IsValidInteractionContext(ctx, out string errorOutput))
         {
-            await ctx.CreateResponseAsync("Invalid channel.");
+            await ctx.CreateResponseAsync(errorOutput);
             return;
         }
 
@@ -56,26 +56,14 @@ public class GeneralCommands : ApplicationCommandModule
     [SlashCommand("remove-read-only", "remove read only from user")]
     public async Task RemoveReadOnlyCommand(InteractionContext ctx, [Option("target", "target member to remove read only")] DiscordUser targetMember)
     {
-        if (ctx.Channel != _discordService.CommandsChannel)
+
+        if (!IsValidInteractionContext(ctx, out string errorOutput, targetMember))
         {
-            await ctx.CreateResponseAsync("Invalid channel.");
+            await ctx.CreateResponseAsync(errorOutput);
             return;
         }
+
         Log.Information("RemoveReadOnlyCommand");
-
-        var senderMember = ctx.Member;
-
-        if (targetMember == null || senderMember == null)
-        {
-            await ctx.CreateResponseAsync("```SUCH MEMBERS DO NOT EXIST```");
-            return;
-        }
-
-        if (targetMember.Id == senderMember.Id)
-        {
-            await ctx.CreateResponseAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
-            return;
-        }
 
         var member = await _discordService.Guild.GetMemberAsync(targetMember.Id);
 
@@ -101,23 +89,13 @@ public class GeneralCommands : ApplicationCommandModule
     [SlashCommand("read-only", "put read only on user")]
     public async Task ReadOnlyCommand(InteractionContext ctx, [Option("target", "target member")] DiscordUser targetMember, [Option("reason", "reason for this action")] string reason)
     {
-        if (ctx.Channel != _discordService.CommandsChannel)
+        if (!IsValidInteractionContext(ctx, out string errorOutput, targetMember))
+        {
+            await ctx.CreateResponseAsync(errorOutput);
             return;
+        }
+
         Log.Information("ReadOnlyCommand");
-
-        var senderMember = ctx.Member;
-
-        if (targetMember == null || senderMember == null)
-        {
-            await ctx.CreateResponseAsync("```SUCH MEMBERS DO NOT EXIST```");
-            return;
-        }
-
-        if (targetMember.Id == senderMember.Id)
-        {
-            await ctx.CreateResponseAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
-            return;
-        }
 
         var member = await _discordService.Guild.GetMemberAsync(targetMember.Id);
         if (member.Roles.Any(x => x.Id == _discordService.ReadOnlyRole.Id))
@@ -139,11 +117,12 @@ public class GeneralCommands : ApplicationCommandModule
     [SlashCommand("apps", "get active applications")]
     public async Task AppsCommand(InteractionContext ctx)
     {
-        if (ctx.Channel != _discordService.CommandsChannel)
+        if (!IsValidInteractionContext(ctx, out string errorOutput))
         {
-            await ctx.CreateResponseAsync("Invalid channel.");
+            await ctx.CreateResponseAsync(errorOutput);
             return;
         }
+
         Log.Information("AppsCommand");
 
         var waitingIssuers = await _serverDiscordApi.GetApps();
@@ -153,12 +132,14 @@ public class GeneralCommands : ApplicationCommandModule
     [SlashCommand("ann", "post announcement in server")]
     public async Task AnnCommand(InteractionContext ctx, [Option("announcement", "announcement to post on the server")] string text)
     {
-        Log.Information("AnnCommand");
-        if (ctx.Channel != _discordService.CommandsChannel)
+
+        if (!IsValidInteractionContext(ctx, out string errorOutput))
         {
-            await ctx.CreateResponseAsync("Invalid channel.");
+            await ctx.CreateResponseAsync(errorOutput);
             return;
         }
+
+        Log.Information("AnnCommand");
 
         await _serverDiscordApi.PostAnnouncement(text);
         await ctx.CreateResponseAsync("Announcement sent!");
@@ -167,11 +148,12 @@ public class GeneralCommands : ApplicationCommandModule
     [SlashCommand("save", "save server state")]
     public async Task SaveCommand(InteractionContext ctx)
     {
-        if (ctx.Channel != _discordService.CommandsChannel)
+        if (!IsValidInteractionContext(ctx, out string errorOutput))
         {
-            await ctx.CreateResponseAsync("Invalid channel.");
+            await ctx.CreateResponseAsync(errorOutput);
             return;
         }
+
         Log.Information("SaveCommand");
 
         if (await _serverDiscordApi.PostSave())
@@ -187,28 +169,16 @@ public class GeneralCommands : ApplicationCommandModule
     [SlashCommand("kick", "kick user")]
     public async Task KickCommand(InteractionContext ctx, [Option("target", "target member")] DiscordUser targetMember, [Option("reason", "reason for this action")] string reason)
     {
-        if (ctx.Channel != _discordService.CommandsChannel)
+
+        if (!IsValidInteractionContext(ctx, out string errorOutput, targetMember))
         {
-            await ctx.CreateResponseAsync("Invalid channel.");
+            await ctx.CreateResponseAsync(errorOutput);
             return;
         }
+
         Log.Information("KickCommand");
 
-        var senderMember = ctx.Member;
-
-        if (targetMember == null || senderMember == null)
-        {
-            await ctx.CreateResponseAsync("```SUCH MEMBERS DO NOT EXIST```");
-            return;
-        }
-
-        if (targetMember.Id == senderMember.Id)
-        {
-            await ctx.CreateResponseAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
-            return;
-        }
-
-        if(await _serverDiscordApi.PostKick(nameof(_discordService.CommandsChannel), ctx.User.Id, ctx.User.Username, targetMember.Id, targetMember.Username, reason))
+        if (await _serverDiscordApi.PostKick(nameof(_discordService.CommandsChannel), ctx.User.Id, ctx.User.Username, targetMember.Id, targetMember.Username, reason))
         {
             var member = await _discordService.Guild.GetMemberAsync(targetMember.Id);
             await member.RemoveAsync(reason);
@@ -222,26 +192,13 @@ public class GeneralCommands : ApplicationCommandModule
     [SlashCommand("ban", "ban user")]
     public async Task BanCommand(InteractionContext ctx, [Option("target", "target member")] DiscordUser targetMember, [Option("reason", "reason for this action")] string reason)
     {
-        if (ctx.Channel != _discordService.CommandsChannel)
+        if (!IsValidInteractionContext(ctx, out string errorOutput, targetMember))
         {
-            await ctx.CreateResponseAsync("Invalid channel.");
+            await ctx.CreateResponseAsync(errorOutput);
             return;
         }
+
         Log.Information("BanCommand");
-
-        var senderMember = ctx.Member;
-
-        if (targetMember == null || senderMember == null)
-        {
-            await ctx.CreateResponseAsync("```SUCH MEMBERS DO NOT EXIST```");
-            return;
-        }
-
-        if (targetMember.Id == senderMember.Id)
-        {
-            await ctx.CreateResponseAsync("```YOU CAN'T DO THIS ACTION ON YOURSELF```");
-            return;
-        }
 
         if(await _serverDiscordApi.PostBan(nameof(_discordService.CommandsChannel), ctx.User.Id, ctx.User.Username, targetMember.Id, targetMember.Username, reason))
         {
@@ -251,5 +208,31 @@ public class GeneralCommands : ApplicationCommandModule
         }
 
         await ctx.CreateResponseAsync("Failed to ban user");
+    }
+
+    private bool IsValidInteractionContext(InteractionContext ctx, out string errorOutput, DiscordUser? targetMember = null)
+    {
+        errorOutput = "";
+        var senderMember = ctx.Member;
+
+        if (ctx.Channel != _discordService.CommandsChannel)
+        {
+            errorOutput = "Invalid channel.";
+            return false;
+        }
+
+        if (targetMember == null || senderMember == null)
+        {
+            errorOutput = "```SUCH MEMBERS DO NOT EXIST```";
+            return false;
+        }
+
+        if (targetMember.Id == senderMember.Id)
+        {
+            errorOutput = "```YOU CAN'T DO THIS ACTION ON YOURSELF```";
+            return false;
+        }
+
+        return true;
     }
 }

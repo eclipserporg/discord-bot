@@ -10,6 +10,7 @@ using DSharpPlus.SlashCommands;
 
 namespace DiscordBot.Services;
 
+#nullable disable
 public class DiscordService
 {
     public DiscordClient Client { get; private set; }

@@ -1,5 +1,5 @@
 ﻿namespace DiscordBot.Models;
-
+#nullable disable
 public class DiscordUserDto
 {
     public string Id { get; set; }

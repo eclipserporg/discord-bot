@@ -1,5 +1,5 @@
 ﻿namespace DiscordBot.Models;
-
+#nullable disable
 public class ResponsePairDto
 {
     public ResponsePairDto()
