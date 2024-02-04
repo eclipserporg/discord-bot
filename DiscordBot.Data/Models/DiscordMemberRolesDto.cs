@@ -27,4 +27,9 @@ public class DiscordMemberRolesDto
     /// A collection of donator Discord member ids and their role ids.
     /// </summary>
     public Dictionary<ulong, ulong> MemberRolesDonator { get; set; } = new();
+
+    /// <summary>
+    /// A collection of content creator Discord member ids.
+    /// </summary
+    public HashSet<ulong> ContentCreatorMemberIds { get; set; } = new();
 }
