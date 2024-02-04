@@ -105,34 +105,39 @@ public class DiscordController : ControllerBase
 
         foreach (var member in members)
         {
-            var hasVIP = memberRoles.MemberRolesVIP.TryGetValue(member.Id, out var roleVIP);
-            var hasDonator = memberRoles.MemberRolesDonator.TryGetValue(member.Id, out var roleDonator);
+            var isVIP = memberRoles.MemberRolesVIP.TryGetValue(member.Id, out var roleVIP);
+            var isDonator = memberRoles.MemberRolesDonator.TryGetValue(member.Id, out var roleDonator);
+            var isContentCreator = memberRoles.ContentCreatorMemberIds.Contains(member.Id);
 
             foreach (var role in member.Roles)
             {
-                if (memberRoles.RolesVIP.Contains(role.Id) && (!hasVIP || role.Id != roleVIP))
-                {
+                if (memberRoles.RolesVIP.Contains(role.Id) && (!isVIP || role.Id != roleVIP))
                     await member.RevokeRoleAsync(role);
-                }
 
-                if (memberRoles.RolesDonator.Contains(role.Id) && (!hasDonator || role.Id != roleDonator))
-                {
+                if (memberRoles.RolesDonator.Contains(role.Id) && (!isDonator || role.Id != roleDonator))
                     await member.RevokeRoleAsync(role);
-                }
+
+                if (!isContentCreator && role.Id == _discordService.CreatorRole.Id)
+                    await member.RevokeRoleAsync(_discordService.CreatorRole);
             }
 
-            if (hasVIP && !member.Roles.Any((role) => role.Id == roleVIP))
+            if (isVIP && !member.Roles.Any((role) => role.Id == roleVIP))
             {
                 var role = _discordService.Guild.GetRole(roleVIP);
                 if (role != null)
                     await member.GrantRoleAsync(role);
             }
 
-            if (hasDonator && !member.Roles.Any((role) => role.Id == roleDonator))
+            if (isDonator && !member.Roles.Any((role) => role.Id == roleDonator))
             {
                 var role = _discordService.Guild.GetRole(roleDonator);
                 if (role != null)
                     await member.GrantRoleAsync(role);
+            }
+
+            if (isContentCreator && !member.Roles.Any((role) => role.Id == _discordService.CreatorRole.Id))
+            {
+                await member.GrantRoleAsync(_discordService.CreatorRole);
             }
         }
     }
