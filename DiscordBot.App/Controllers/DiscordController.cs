@@ -105,24 +105,39 @@ public class DiscordController : ControllerBase
 
         foreach (var member in members)
         {
-            var hasVIP = memberRoles.MemberRolesVIP.TryGetValue(member.Id, out var vipId);
+            var isVIP = memberRoles.MemberRolesVIP.TryGetValue(member.Id, out var roleVIP);
+            var isDonator = memberRoles.MemberRolesDonator.TryGetValue(member.Id, out var roleDonator);
+            var isContentCreator = memberRoles.ContentCreatorMemberIds.Contains(member.Id);
 
             foreach (var role in member.Roles)
             {
-                if (memberRoles.RolesVIP.Contains(role.Id))
-                {
-                    if (!hasVIP|| role.Id != vipId)
-                    {
-                        await member.RevokeRoleAsync(role);
-                    }
-                }
+                if (memberRoles.RolesVIP.Contains(role.Id) && (!isVIP || role.Id != roleVIP))
+                    await member.RevokeRoleAsync(role);
+
+                if (memberRoles.RolesDonator.Contains(role.Id) && (!isDonator || role.Id != roleDonator))
+                    await member.RevokeRoleAsync(role);
+
+                if (!isContentCreator && role.Id == _discordService.CreatorRole.Id)
+                    await member.RevokeRoleAsync(_discordService.CreatorRole);
             }
 
-            if (hasVIP && !member.Roles.Any((role) => role.Id == vipId))
+            if (isVIP && !member.Roles.Any((role) => role.Id == roleVIP))
             {
-                var role = _discordService.Guild.GetRole(vipId);
+                var role = _discordService.Guild.GetRole(roleVIP);
                 if (role != null)
                     await member.GrantRoleAsync(role);
+            }
+
+            if (isDonator && !member.Roles.Any((role) => role.Id == roleDonator))
+            {
+                var role = _discordService.Guild.GetRole(roleDonator);
+                if (role != null)
+                    await member.GrantRoleAsync(role);
+            }
+
+            if (isContentCreator && !member.Roles.Any((role) => role.Id == _discordService.CreatorRole.Id))
+            {
+                await member.GrantRoleAsync(_discordService.CreatorRole);
             }
         }
     }
