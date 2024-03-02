@@ -1,4 +1,4 @@
-# ECLIPSE Roleplay Discord Bot
+# Discord Bot
 
 ## Table of Contents
 
