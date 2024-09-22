@@ -37,7 +37,7 @@ public class AuthenticationCommands : ApplicationCommandModule
             if (response.Status)
                 await discordMember.GrantRoleAsync(_discordService.MemberRole);
 
-            await ctx.CreateResponseAsync(response.Message);
+            await ctx.CreateResponseAsync(response.Message, ephemeral: true);
         }
     }
 }
