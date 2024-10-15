@@ -1,5 +1,5 @@
 ﻿namespace DiscordBot.Settings;
-
+#nullable disable
 public class ServerApiSettings
 {
     public string Url { get; set; }

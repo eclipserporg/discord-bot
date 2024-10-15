@@ -1,5 +1,6 @@
 ﻿namespace DiscordBot.Settings;
 
+#nullable disable
 public class Roles
 {
     public ulong Member { get; set; }
