@@ -76,9 +76,7 @@ public class DiscordService
 
         foreach (var role in Guild.Roles.Values)
         {
-            if (role.Id == _settings.Roles.Donator)
-                DonatorRole = role;
-            else if (role.Id == _settings.Roles.Member)
+            if (role.Id == _settings.Roles.Member)
                 MemberRole = role;
             else if (role.Id == _settings.Roles.Banned)
                 BannedRole = role;
