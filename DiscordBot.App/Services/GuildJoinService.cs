@@ -37,10 +37,6 @@ public class GuildJoinService
             case "Member":
                 await e.Member.GrantRoleAsync(_discordService.MemberRole);
                 return;
-            case "Donator":
-                await e.Member.GrantRoleAsync(_discordService.MemberRole);
-                await e.Member.GrantRoleAsync(_discordService.DonatorRole);
-                return;
         }
     }
 }

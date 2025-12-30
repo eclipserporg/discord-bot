@@ -2,6 +2,7 @@ using DiscordBot.Data.Models;
 using DiscordBot.Models;
 using DiscordBot.Services;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
@@ -36,18 +37,29 @@ public class DiscordController : ControllerBase
     public async Task<DiscordUserDto?> GetUser(ulong id)
     {
         Log.Information("Get user");
-        var member = await _discordService.Guild.GetMemberAsync(id);
 
-        if (member == null)
-            return null;
-
-        return new DiscordUserDto()
+        try
         {
-            Id = member.Id.ToString(),
-            Username = member.Username,
-            Discriminator = member.Discriminator,
-            AvatarUrl = member.AvatarUrl
-        };
+            var discordUser = await _discordService.Client.GetUserAsync(id);
+            return new()
+            {
+                Id = discordUser.Id.ToString(),
+                Username = discordUser.Username,
+                Discriminator = discordUser.Discriminator,
+                AvatarUrl = discordUser.AvatarUrl
+            };
+        }
+
+        catch (NotFoundException)
+        {
+            return new()
+            {
+                Id = id.ToString(),
+                Username = "unknown discord user",
+                Discriminator = string.Empty,
+                AvatarUrl = @"https://cdn.discordapp.com/embed/avatars/1.png"
+            };
+        }
     }
 
     [HttpPost(Name = "grantRole")]
@@ -65,7 +77,6 @@ public class DiscordController : ControllerBase
             nameof(_discordService.CreatorRole) => _discordService.CreatorRole,
             nameof(_discordService.BannedRole) => _discordService.BannedRole,
             nameof(_discordService.ReadOnlyRole) => _discordService.ReadOnlyRole,
-            nameof(_discordService.DonatorRole) => _discordService.DonatorRole,
             _ => throw new Exception("Invalid role name")
         };
 
@@ -76,22 +87,23 @@ public class DiscordController : ControllerBase
     public async Task PostRevokeRole(ulong id, string role)
     {
         Log.Information("Post revokeRole");
-        var member = await _discordService.Guild.GetMemberAsync(id);
 
-        if (member == null)
-            return;
-
-        var discordRole = role switch
+        try
         {
-            nameof(_discordService.MemberRole) => _discordService.MemberRole,
-            nameof(_discordService.CreatorRole) => _discordService.CreatorRole,
-            nameof(_discordService.BannedRole) => _discordService.BannedRole,
-            nameof(_discordService.ReadOnlyRole) => _discordService.ReadOnlyRole,
-            nameof(_discordService.DonatorRole) => _discordService.DonatorRole,
-            _ => throw new Exception("Invalid role name")
-        };
+            var discordMember = await _discordService.Guild.GetMemberAsync(id);
+            var discordRole = role switch
+            {
+                nameof(_discordService.MemberRole) => _discordService.MemberRole,
+                nameof(_discordService.CreatorRole) => _discordService.CreatorRole,
+                nameof(_discordService.BannedRole) => _discordService.BannedRole,
+                nameof(_discordService.ReadOnlyRole) => _discordService.ReadOnlyRole,
+                _ => throw new Exception("Invalid role name")
+            };
 
-        await member.RevokeRoleAsync(discordRole);
+            await discordMember.RevokeRoleAsync(discordRole);
+        }
+
+        catch (NotFoundException) { }
     }
 
     [HttpPost(Name = "updateMemberRoles")]

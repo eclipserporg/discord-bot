@@ -21,7 +21,6 @@ public class DiscordService
     public DiscordRole MemberRole { get; private set; }
     public DiscordRole ReadOnlyRole { get; private set; }
     public DiscordRole BannedRole { get; private set; }
-    public DiscordRole DonatorRole { get; private set; }
     public DiscordRole CreatorRole { get; private set; }
     public DiscordChannel HelpVerifyChannel { get; private set; }
     public DiscordChannel VerificationChannel { get; private set; }
