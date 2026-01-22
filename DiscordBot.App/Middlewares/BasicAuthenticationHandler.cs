@@ -26,7 +26,7 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        string authHeader = Request.Headers["Authorization"];
+        string? authHeader = Request.Headers["Authorization"];
         if (authHeader != null && authHeader.StartsWith("Basic"))
         {
 
@@ -43,9 +43,9 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
                 var principal = new ClaimsPrincipal(identity);
                 var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
-                return AuthenticateResult.Success(ticket);
+                return await Task.FromResult(AuthenticateResult.Success(ticket));
             }
         }
-        return AuthenticateResult.Fail("Failed to authenticate");
+        return await Task.FromResult(AuthenticateResult.Fail("Failed to authenticate"));
     }
 }
