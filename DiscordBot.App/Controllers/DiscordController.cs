@@ -41,6 +41,10 @@ public class DiscordController : ControllerBase
         try
         {
             var discordUser = await _discordService.Client.GetUserAsync(id);
+            var discordMember = await _discordService.Guild.GetMemberAsync(id);
+
+            Log.Information($"Get user {discordUser.Username} {discordMember.Nickname} {discordMember.DisplayName} {discordMember.PremiumSince.ToString()}");
+
             return new()
             {
                 Id = discordUser.Id.ToString(),
