@@ -19,7 +19,7 @@ ECLIPSE Roleplay community's discord bot. Written in C#, built on ASP.NET, utili
 
 ## Prerequisites
 
-- .NET 6.0 or higher
+- .NET 9.0 or higher
 - Discord API Token
 
 ## Usage
