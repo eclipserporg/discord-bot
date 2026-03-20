@@ -21,6 +21,7 @@ public class VerifyCommand
         _discordService = discordService;
     }
 
+    [Command("verify")]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.HelpVerifyChannel)
@@ -47,6 +48,7 @@ public class PingServerCommand
         _discordService = discordService;
     }
 
+    [Command("pingserver")]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -77,6 +79,7 @@ public class RemoveReadOnlyCommand
         _discordService = discordService;
     }
 
+    [Command("remove-read-only")]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("target")] [Description("target member to remove read only")] DiscordUser targetMember)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -129,6 +132,7 @@ public class ReadOnlyCommand
         _discordService = discordService;
     }
 
+    [Command("read-only")]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("target")] [Description("target member")] DiscordUser targetMember, [Parameter("reason")] [Description("reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -176,6 +180,7 @@ public class AppsCommand
         _discordService = discordService;
     }
 
+    [Command("apps")]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -202,6 +207,7 @@ public class AnnCommand
         _discordService = discordService;
     }
 
+    [Command("ann")]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("announcement")] [Description("announcement to post on the server")] string text)
     {
         Log.Information("AnnCommand");
@@ -228,6 +234,7 @@ public class SaveCommand
         _discordService = discordService;
     }
 
+    [Command("save")]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -256,6 +263,7 @@ public class KickCommand
         _discordService = discordService;
     }
 
+    [Command("kick")]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("target")] [Description("target member")] DiscordUser targetMember, [Parameter("reason")] [Description("reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -300,6 +308,7 @@ public class BanCommand
         _discordService = discordService;
     }
 
+    [Command("ban")]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("target")] [Description("target member")] DiscordUser targetMember, [Parameter("reason")] [Description("reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)

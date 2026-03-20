@@ -23,6 +23,7 @@ public class StopRestartCommand
         _state = state;
     }
 
+    [Command("stoprestart")]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -55,6 +56,7 @@ public class StartRestartCommand
         _state = state;
     }
 
+    [Command("startrestart")]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("minutes")] [Description("restart in minutes")] long minutes)
     {
         if (ctx.Channel != _discordService.CommandsChannel)

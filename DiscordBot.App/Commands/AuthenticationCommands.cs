@@ -20,6 +20,7 @@ public class AuthenticationCommands
         _serverDiscordApi = serverDiscordApi;
     }
 
+    [Command("login")]
     public async Task ExecuteAsync(SlashCommandContext ctx,
         [Parameter("account")] [Description("your in-game account name")] string username,
         [Parameter("password")] [Description("the password for your in-game account")] string password)
