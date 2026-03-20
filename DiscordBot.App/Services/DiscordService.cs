@@ -59,15 +59,25 @@ public class DiscordService
         {
             services.AddRefitServices(_serverApiSettings);
             services.AddSingleton(this);
+            services.AddSingleton<RestartState>();
         });
 
         builder.UseCommands((sp, ext) =>
         {
             ext.ConfiguringCommands += async (_, e) =>
             {
-                e.CommandTrees.AddRange(CommandBuilder.From<AuthenticationCommands>());
-                e.CommandTrees.AddRange(CommandBuilder.From<GeneralCommands>());
-                e.CommandTrees.AddRange(CommandBuilder.From<RestartCommands>());
+                e.CommandTrees.Add(CommandBuilder.From<AuthenticationCommands>());
+                e.CommandTrees.Add(CommandBuilder.From<VerifyCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<PingServerCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<RemoveReadOnlyCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<ReadOnlyCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<AppsCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<AnnCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<SaveCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<KickCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<BanCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<StopRestartCommand>());
+                e.CommandTrees.Add(CommandBuilder.From<StartRestartCommand>());
                 await Task.CompletedTask;
             };
         });

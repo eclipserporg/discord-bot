@@ -7,6 +7,8 @@ using DSharpPlus.Entities;
 
 namespace DiscordBot.Commands;
 
+[Command("login")]
+[Description("Use to link your Discord user to an in-game account. Use via direct message only!")]
 public class AuthenticationCommands
 {
     private readonly DiscordService _discordService;
@@ -18,9 +20,7 @@ public class AuthenticationCommands
         _serverDiscordApi = serverDiscordApi;
     }
 
-    [Command("login")]
-    [Description("Use to link your Discord user to an in-game account. Use via direct message only!")]
-    public async Task LoginCommand(SlashCommandContext ctx,
+    public async Task ExecuteAsync(SlashCommandContext ctx,
         [Parameter("account")] [Description("your in-game account name")] string username,
         [Parameter("password")] [Description("the password for your in-game account")] string password)
     {

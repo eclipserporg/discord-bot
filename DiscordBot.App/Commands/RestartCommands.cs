@@ -8,45 +8,100 @@ using Serilog;
 
 namespace DiscordBot.Commands;
 
-public class RestartCommands
+[Command("stoprestart")]
+[Description("Used for stopping inprogress restart!")]
+public class StopRestartCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
     private readonly DiscordService _discordService;
-    private readonly int _minimumRestartMinutes = 5;
-    private CancellationTokenSource _restartCancellationTokenSource;
+    private readonly RestartState _state;
 
-    private long _restartMinutes = 0;
-    private bool _restartInProgress = false;
-    private DiscordUser _restartInitiator;
-
-    public RestartCommands(IServerDiscordApi serverDiscordApi, DiscordService discordService)
+    public StopRestartCommand(IServerDiscordApi serverDiscordApi, DiscordService discordService, RestartState state)
     {
         _serverDiscordApi = serverDiscordApi;
         _discordService = discordService;
-        _restartCancellationTokenSource = new CancellationTokenSource();
+        _state = state;
+    }
+
+    public async Task ExecuteAsync(SlashCommandContext ctx)
+    {
+        if (ctx.Channel != _discordService.CommandsChannel)
+            return;
+
+        if (!_state.InProgress)
+        {
+            await ctx.RespondAsync("No restart in progress");
+            return;
+        }
+
+        _state.CancellationTokenSource.Cancel();
+        await ctx.RespondAsync("Restart cancelled");
+    }
+}
+
+[Command("startrestart")]
+[Description("Used starting a restart. Time is in minutes!")]
+public class StartRestartCommand
+{
+    private readonly IServerDiscordApi _serverDiscordApi;
+    private readonly DiscordService _discordService;
+    private readonly RestartState _state;
+    private const int MinimumRestartMinutes = 5;
+
+    public StartRestartCommand(IServerDiscordApi serverDiscordApi, DiscordService discordService, RestartState state)
+    {
+        _serverDiscordApi = serverDiscordApi;
+        _discordService = discordService;
+        _state = state;
+    }
+
+    public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("minutes")] [Description("restart in minutes")] long minutes)
+    {
+        if (ctx.Channel != _discordService.CommandsChannel)
+            return;
+
+        if (_state.InProgress)
+        {
+            await ctx.RespondAsync("Restart already in progress");
+            return;
+        }
+
+        if (minutes < MinimumRestartMinutes)
+        {
+            await ctx.RespondAsync($"Minimum restart time is {MinimumRestartMinutes} minutes");
+            return;
+        }
+
+        _state.Minutes = minutes;
+        _state.Initiator = ctx.User;
+        _state.InProgress = true;
+        _state.CancellationTokenSource = new CancellationTokenSource();
+
+        await ctx.RespondAsync($"Starting server restart in {minutes} minutes");
+        await RestartLoop(_state.CancellationTokenSource.Token);
     }
 
     private async Task RestartLoop(CancellationToken token)
     {
         try
         {
-            while (_restartMinutes >= 0)
+            while (_state.Minutes >= 0)
             {
-                if (_restartMinutes == 0)
+                if (_state.Minutes == 0)
                 {
                     await _serverDiscordApi.PostAnnouncement("Server will restart now");
                     Log.Information("Saving server...");
                     await _serverDiscordApi.PostSave();
-                    await _discordService.CommandsChannel.SendMessageAsync($"{_restartInitiator.Mention} Server has been saved. Continue with restart.");
-                    _restartInProgress = false;
+                    await _discordService.CommandsChannel.SendMessageAsync($"{_state.Initiator!.Mention} Server has been saved. Continue with restart.");
+                    _state.InProgress = false;
                     return;
                 }
                 else
                 {
-                    await _serverDiscordApi.PostAnnouncement($"Server will restart in {_restartMinutes} minutes");
-                    Log.Information($"Server will restart in {_restartMinutes} minutes");
+                    await _serverDiscordApi.PostAnnouncement($"Server will restart in {_state.Minutes} minutes");
+                    Log.Information($"Server will restart in {_state.Minutes} minutes");
                     await Task.Delay(TimeSpan.FromMinutes(1), token);
-                    _restartMinutes--;
+                    _state.Minutes--;
                 }
             }
         }
@@ -54,51 +109,16 @@ public class RestartCommands
         {
             Log.Error(e, "Error while restarting server");
             await _discordService.CommandsChannel.SendMessageAsync($"Error while restarting server: {e.Message}");
-            _restartInProgress = false;
-            return;
+            _state.InProgress = false;
         }
     }
+}
 
-    [Command("stoprestart")]
-    [Description("Used for stopping inprogress restart!")]
-    public async Task StopRestartCommand(SlashCommandContext ctx)
-    {
-        if (ctx.Channel != _discordService.CommandsChannel)
-            return;
-
-        if (!_restartInProgress)
-        {
-            await ctx.RespondAsync("No restart in progress");
-            return;
-        }
-
-        _restartCancellationTokenSource.Cancel();
-        await ctx.RespondAsync("Restart cancelled");
-    }
-
-    [Command("startrestart")]
-    [Description("Used starting a restart. Time is in minutes!")]
-    public async Task StartRestartCommand(SlashCommandContext ctx, [Parameter("minutes")] [Description("restart in minutes")] long minutes)
-    {
-        if (ctx.Channel != _discordService.CommandsChannel)
-            return;
-
-        if (_restartInProgress)
-        {
-            await ctx.RespondAsync("Restart already in progress");
-            return;
-        }
-
-        if (minutes < _minimumRestartMinutes)
-        {
-            await ctx.RespondAsync($"Minimum restart time is {_minimumRestartMinutes} minutes");
-            return;
-        }
-
-        _restartMinutes = minutes;
-        _restartInitiator = ctx.User;
-        _restartInProgress = true;
-        await ctx.RespondAsync($"Starting server restart in {minutes} minutes");
-        await RestartLoop(_restartCancellationTokenSource.Token);
-    }
+/// <summary>Shared mutable state between stoprestart and startrestart commands.</summary>
+public class RestartState
+{
+    public long Minutes { get; set; }
+    public bool InProgress { get; set; }
+    public DiscordUser? Initiator { get; set; }
+    public CancellationTokenSource CancellationTokenSource { get; set; } = new();
 }
