@@ -3,13 +3,15 @@ using DiscordBot.Apis;
 using DiscordBot.Services;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.Metadata;
+using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using Serilog;
 
 namespace DiscordBot.Commands;
 
 [Command("stoprestart")]
-[Description("Used for stopping inprogress restart!")]
+[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class StopRestartCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -23,7 +25,8 @@ public class StopRestartCommand
         _state = state;
     }
 
-    [Command("stoprestart")]
+    [DefaultGroupCommand]
+    [Description("Used for stopping inprogress restart!")]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -41,7 +44,7 @@ public class StopRestartCommand
 }
 
 [Command("startrestart")]
-[Description("Used starting a restart. Time is in minutes!")]
+[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class StartRestartCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -56,7 +59,8 @@ public class StartRestartCommand
         _state = state;
     }
 
-    [Command("startrestart")]
+    [DefaultGroupCommand]
+    [Description("Used starting a restart. Time is in minutes!")]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("minutes")] [Description("restart in minutes")] long minutes)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
