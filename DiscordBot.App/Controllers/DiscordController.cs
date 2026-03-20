@@ -21,18 +21,6 @@ public class DiscordController : ControllerBase
         _discordService = discordService;
     }
 
-    [HttpGet(Name = "hasContentCreator")]
-    public async Task<bool> GetHasContentCreator(ulong id)
-    {
-        Log.Information("Get hasContentCreator");
-        var member = await _discordService.Guild.GetMemberAsync(id);
-
-        if(member == null)
-            return false;
-
-        return member.Roles.Any(x => x.Id == _discordService.CreatorRole.Id);
-    }
-
     [HttpGet(Name = "user")]
     public async Task<DiscordUserDto?> GetUser(ulong id)
     {
@@ -41,9 +29,6 @@ public class DiscordController : ControllerBase
         try
         {
             var discordUser = await _discordService.Client.GetUserAsync(id);
-            var discordMember = await _discordService.Guild.GetMemberAsync(id);
-
-            Log.Information($"Get user {discordUser.Username} {discordMember.Nickname} {discordMember.DisplayName} {discordMember.PremiumSince.ToString()}");
 
             return new()
             {
@@ -53,7 +38,6 @@ public class DiscordController : ControllerBase
                 AvatarUrl = discordUser.AvatarUrl
             };
         }
-
         catch (NotFoundException)
         {
             return new()
@@ -63,6 +47,38 @@ public class DiscordController : ControllerBase
                 Discriminator = string.Empty,
                 AvatarUrl = @"https://cdn.discordapp.com/embed/avatars/1.png"
             };
+        }
+    }
+
+    [HttpGet(Name = "isNitroBooster")]
+    public async Task<bool> GetIsNitroBooster(ulong id)
+    {
+        Log.Information("Get isNitroBooster");
+
+        try
+        {
+            var discordMember = await _discordService.Guild.GetMemberAsync(id);
+            return discordMember.PremiumSince.HasValue;
+        }
+        catch (NotFoundException)
+        {
+            return false;
+        }
+    }
+
+    [HttpGet(Name = "hasPrimaryGuild")]
+    public async Task<bool> GetHasPrimaryGuild(ulong id)
+    {
+        Log.Information("Get hasPrimaryGuild");
+
+        try
+        {
+            var discordUser = await _discordService.Client.GetUserAsync(id);
+            return discordUser.PrimaryGuild?.IdentityGuildId == _discordService.Guild.Id;
+        }
+        catch (NotFoundException)
+        {
+            return false;
         }
     }
 
@@ -114,12 +130,7 @@ public class DiscordController : ControllerBase
     public async Task PostUpdateMemberRoles(DiscordMemberRolesDto memberRoles)
     {
         Log.Information("Post updateMemberRoles");
-        var members = await _discordService.Guild.GetAllMembersAsync();
-
-        if (members == null)
-            return;
-
-        foreach (var member in members)
+        await foreach (var member in _discordService.Guild.GetAllMembersAsync())
         {
             var isVIP = memberRoles.MemberRolesVIP.TryGetValue(member.Id, out var roleVIP);
             var isDonator = memberRoles.MemberRolesDonator.TryGetValue(member.Id, out var roleDonator);
@@ -139,16 +150,14 @@ public class DiscordController : ControllerBase
 
             if (isVIP && !member.Roles.Any((role) => role.Id == roleVIP))
             {
-                var role = _discordService.Guild.GetRole(roleVIP);
-                if (role != null)
-                    await member.GrantRoleAsync(role);
+                if (_discordService.Guild.Roles.TryGetValue(roleVIP, out var guildRoleVIP))
+                    await member.GrantRoleAsync(guildRoleVIP);
             }
 
             if (isDonator && !member.Roles.Any((role) => role.Id == roleDonator))
             {
-                var role = _discordService.Guild.GetRole(roleDonator);
-                if (role != null)
-                    await member.GrantRoleAsync(role);
+                if (_discordService.Guild.Roles.TryGetValue(roleDonator, out var guildRoleDonator))
+                    await member.GrantRoleAsync(guildRoleDonator);
             }
 
             if (isContentCreator && !member.Roles.Any((role) => role.Id == _discordService.CreatorRole.Id))

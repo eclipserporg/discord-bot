@@ -1,13 +1,13 @@
-﻿using DiscordBot.Apis;
+using System.ComponentModel;
+using DiscordBot.Apis;
 using DiscordBot.Services;
-using DSharpPlus;
-using DSharpPlus.EventArgs;
-using DSharpPlus.SlashCommands;
-using System.Xml.Linq;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Entities;
 
 namespace DiscordBot.Commands;
 
-public class AuthenticationCommands : ApplicationCommandModule
+public class AuthenticationCommands
 {
     private readonly DiscordService _discordService;
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -18,13 +18,15 @@ public class AuthenticationCommands : ApplicationCommandModule
         _serverDiscordApi = serverDiscordApi;
     }
 
-    [SlashCommand("login", "Use to link your Discord user to an in-game account. Use via direct message only!", defaultPermission: false)]
-    public async Task LoginCommand(InteractionContext ctx, [Option("account", "your in-game account name")] string username, [Option("password", "the password for your in-game account")] string password)
+    [Command("login")]
+    [Description("Use to link your Discord user to an in-game account. Use via direct message only!")]
+    public async Task LoginCommand(SlashCommandContext ctx,
+        [Parameter("account")] [Description("your in-game account name")] string username,
+        [Parameter("password")] [Description("the password for your in-game account")] string password)
     {
-        if (ctx.Channel.Type != ChannelType.Private)
+        if (ctx.Channel.Type != DiscordChannelType.Private)
         {
-            // Do not provide an interaction context response so the command parameters remain hidden to others. Send a direct message instead.
-            await ctx.Member.SendMessageAsync("Please do not use the **/login** command in public channels as it could compromise your in-game account! It is also recommended to click **\"Dismiss message\"** on all of the notifications that contain the bot command to permanently hide your credentials.");
+            await ctx.Member!.SendMessageAsync("Please do not use the **/login** command in public channels as it could compromise your in-game account! It is also recommended to click **\"Dismiss message\"** on all of the notifications that contain the bot command to permanently hide your credentials.");
             return;
         }
 
@@ -37,7 +39,7 @@ public class AuthenticationCommands : ApplicationCommandModule
             if (response.Status)
                 await discordMember.GrantRoleAsync(_discordService.MemberRole);
 
-            await ctx.CreateResponseAsync(response.Message, ephemeral: true);
+            await ctx.RespondAsync(response.Message, true);
         }
     }
 }

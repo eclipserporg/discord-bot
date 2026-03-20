@@ -22,6 +22,6 @@ public class PresenceController : ControllerBase
     public async Task PostPlayers(int playerCount)
     {
         Log.Information("Post players");
-        await _discordService.Client.UpdateStatusAsync(new DiscordActivity($"with {playerCount} players!", ActivityType.Playing));
+        await _discordService.Client.UpdateStatusAsync(new DiscordActivity($"with {playerCount} players!", DiscordActivityType.Playing));
     }
 }

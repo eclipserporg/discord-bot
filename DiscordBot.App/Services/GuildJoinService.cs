@@ -14,10 +14,10 @@ public class GuildJoinService
         _discordService = discordService;
         _serverDiscordApi = serverDiscordApi;
 
-        discordService.Client.GuildMemberAdded += OnGuildMemberAdd;
+        discordService.SetGuildMemberAddedHandler(OnGuildMemberAdd);
     }
 
-    private async Task OnGuildMemberAdd(DiscordClient client, GuildMemberAddEventArgs e)
+    private async Task OnGuildMemberAdd(DiscordClient client, GuildMemberAddedEventArgs e)
     {
         if (e.Guild != _discordService.Guild)
             return;
@@ -25,7 +25,7 @@ public class GuildJoinService
         await HandleGuildJoin(e);
     }
 
-    private async Task HandleGuildJoin(GuildMemberAddEventArgs e)
+    private async Task HandleGuildJoin(GuildMemberAddedEventArgs e)
     {
         var status = await _serverDiscordApi.GetAccountStatus(e.Member.Id);
 

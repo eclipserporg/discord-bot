@@ -1,12 +1,12 @@
-﻿using DiscordBot.Settings;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
 using DiscordBot.Commands;
-using Serilog;
+using DiscordBot.Settings;
+using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Trees;
 using Microsoft.Extensions.Options;
-using DSharpPlus.SlashCommands;
+using Serilog;
 
 namespace DiscordBot.Services;
 
@@ -16,6 +16,7 @@ public class DiscordService
     public DiscordGuild Guild { get; private set; }
     private readonly DiscordSettings _settings;
     private readonly ServerApiSettings _serverApiSettings;
+    private Func<DiscordClient, GuildMemberAddedEventArgs, Task>? _guildMemberAddedHandler;
 
     // Fix this
     public DiscordRole MemberRole { get; private set; }
@@ -28,7 +29,7 @@ public class DiscordService
     public DiscordChannel GeneralChannel { get; private set; }
     public DiscordChannel SurveilanceChannel { get; private set; }
     public DiscordChannel CheatChannel { get; private set; }
-    public DiscordChannel VerifyLogsChannel { get; private  set; }
+    public DiscordChannel VerifyLogsChannel { get; private set; }
     public DiscordChannel LinkedAccountsChannel { get; private set; }
     public DiscordChannel LinkedAccountsCompactChannel { get; private set; }
     public DiscordChannel DiscordBotLogsChannel { get; private set; }
@@ -43,33 +44,45 @@ public class DiscordService
         _settings = discordSettings.Value;
     }
 
+    public void SetGuildMemberAddedHandler(Func<DiscordClient, GuildMemberAddedEventArgs, Task> handler)
+    {
+        _guildMemberAddedHandler = handler;
+    }
+
     public async Task Start()
     {
-        var configuration = new DiscordConfiguration
+        var builder = DiscordClientBuilder.CreateDefault(
+            _settings.Token,
+            DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents | DiscordIntents.DirectMessages);
+
+        builder.ConfigureServices(services =>
         {
-            TokenType = TokenType.Bot,
-            Token = _settings.Token,
-            ReconnectIndefinitely = true,
-            AutoReconnect = true,
-            Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents | DiscordIntents.DirectMessages
-        };
+            services.AddRefitServices(_serverApiSettings);
+            services.AddSingleton(this);
+        });
 
-        Client = new DiscordClient(configuration);
-
-        var slashConfig = new SlashCommandsConfiguration()
+        builder.UseCommands((sp, ext) =>
         {
-            Services = new ServiceCollection()
-                .AddRefitServices(_serverApiSettings)
-                .AddSingleton(this)
-                .BuildServiceProvider()
-        };
+            ext.ConfiguringCommands += async (_, e) =>
+            {
+                e.CommandTrees.AddRange(CommandBuilder.From<AuthenticationCommands>());
+                e.CommandTrees.AddRange(CommandBuilder.From<GeneralCommands>());
+                e.CommandTrees.AddRange(CommandBuilder.From<RestartCommands>());
+                await Task.CompletedTask;
+            };
+        });
 
-        var slashCommands = Client.UseSlashCommands(slashConfig);
-        slashCommands.RegisterCommands<AuthenticationCommands>();
-        slashCommands.RegisterCommands<GeneralCommands>();
-        slashCommands.RegisterCommands<RestartCommands>();
-        
-        await Client.InitializeAsync();
+        builder.ConfigureEventHandlers(b =>
+        {
+            b.HandleGuildMemberAdded(async (client, e) =>
+            {
+                if (_guildMemberAddedHandler != null)
+                    await _guildMemberAddedHandler(client, e);
+            });
+        });
+
+        Client = builder.Build();
+
         await Client.ConnectAsync();
 
         Guild = await Client.GetGuildAsync(_settings.Guild);
@@ -118,14 +131,10 @@ public class DiscordService
                 BanNotificationsChannel = channel;
         }
 
-        Client.ClientErrored += OnClientError;
-        Client.SocketErrored += OnSocketError;
-        //commands.CommandErrored += OnCommandError;
-
-        await SetPresence(ActivityType.Playing, "ECLIPSE Roleplay!");
+        await SetPresence(DiscordActivityType.Playing, "ECLIPSE Roleplay!");
     }
 
-    public async Task SetPresence(ActivityType type, string message)
+    public async Task SetPresence(DiscordActivityType type, string message)
     {
         try
         {
@@ -135,25 +144,5 @@ public class DiscordService
         {
             Log.Error("Failed to set presence");
         }
-    }
-
-    private Task OnClientError(DiscordClient sender, ClientErrorEventArgs e)
-    {
-        Log.Error(e.Exception, "OnClientError");
-        Log.Error(e.ToString());
-        return Task.CompletedTask;
-    }
-
-    private Task OnCommandError(CommandsNextExtension sender, CommandErrorEventArgs e)
-    {
-        Log.Error(e.Exception, "OnCommandError");
-        Log.Error(e.ToString());
-        return Task.CompletedTask;
-    }
-    private Task OnSocketError(DiscordClient sender, SocketErrorEventArgs e)
-    {
-        Log.Error(e.Exception, "OnSocketError");
-        Log.Error(e.ToString());
-        return Task.CompletedTask;
     }
 }
