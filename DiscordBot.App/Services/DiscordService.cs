@@ -65,22 +65,18 @@ public class DiscordService
 
         builder.UseCommands((sp, ext) =>
         {
-            ext.ConfiguringCommands += async (_, e) =>
-            {
-                e.CommandTrees.Add(CommandBuilder.From(typeof(AuthenticationCommands).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AuthenticationCommands>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(VerifyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<VerifyCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(PingServerCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<PingServerCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(RemoveReadOnlyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<RemoveReadOnlyCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(ReadOnlyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<ReadOnlyCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(AppsCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AppsCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(AnnCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AnnCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(SaveCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<SaveCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(KickCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<KickCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(BanCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<BanCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(StopRestartCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<StopRestartCommand>(sp)));
-                e.CommandTrees.Add(CommandBuilder.From(typeof(StartRestartCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<StartRestartCommand>(sp)));
-                await Task.CompletedTask;
-            };
+            ext.AddCommand(CommandBuilder.From(typeof(AuthenticationCommands).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AuthenticationCommands>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(VerifyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<VerifyCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(PingServerCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<PingServerCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(RemoveReadOnlyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<RemoveReadOnlyCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(ReadOnlyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<ReadOnlyCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(AppsCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AppsCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(AnnCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AnnCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(SaveCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<SaveCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(KickCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<KickCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(BanCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<BanCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(StopRestartCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<StopRestartCommand>(sp)));
+            ext.AddCommand(CommandBuilder.From(typeof(StartRestartCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<StartRestartCommand>(sp)));
         });
 
         builder.ConfigureEventHandlers(b =>
