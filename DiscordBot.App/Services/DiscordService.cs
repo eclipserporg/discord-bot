@@ -5,6 +5,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.Trees;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -66,18 +67,18 @@ public class DiscordService
         {
             ext.ConfiguringCommands += async (_, e) =>
             {
-                e.CommandTrees.Add(CommandBuilder.From<AuthenticationCommands>());
-                e.CommandTrees.Add(CommandBuilder.From<VerifyCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<PingServerCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<RemoveReadOnlyCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<ReadOnlyCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<AppsCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<AnnCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<SaveCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<KickCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<BanCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<StopRestartCommand>());
-                e.CommandTrees.Add(CommandBuilder.From<StartRestartCommand>());
+                e.CommandTrees.Add(CommandBuilder.From(typeof(AuthenticationCommands).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AuthenticationCommands>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(VerifyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<VerifyCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(PingServerCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<PingServerCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(RemoveReadOnlyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<RemoveReadOnlyCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(ReadOnlyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<ReadOnlyCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(AppsCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AppsCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(AnnCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AnnCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(SaveCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<SaveCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(KickCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<KickCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(BanCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<BanCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(StopRestartCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<StopRestartCommand>(sp)));
+                e.CommandTrees.Add(CommandBuilder.From(typeof(StartRestartCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<StartRestartCommand>(sp)));
                 await Task.CompletedTask;
             };
         });
