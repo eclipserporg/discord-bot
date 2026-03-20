@@ -4,14 +4,11 @@ using DiscordBot.Services;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.Metadata;
-using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using Serilog;
 
 namespace DiscordBot.Commands;
 
-[Command("verify")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class VerifyCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -23,8 +20,9 @@ public class VerifyCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("verify")]
     [Description("help user with verification.")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.HelpVerifyChannel)
@@ -38,8 +36,6 @@ public class VerifyCommand
     }
 }
 
-[Command("pingserver")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class PingServerCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -51,8 +47,9 @@ public class PingServerCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("pingserver")]
     [Description("ping server")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -70,8 +67,6 @@ public class PingServerCommand
     }
 }
 
-[Command("remove-read-only")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class RemoveReadOnlyCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -83,8 +78,9 @@ public class RemoveReadOnlyCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("remove-read-only")]
     [Description("remove read only from user")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("target")] [Description("target member to remove read only")] DiscordUser targetMember)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -124,8 +120,6 @@ public class RemoveReadOnlyCommand
     }
 }
 
-[Command("read-only")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class ReadOnlyCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -137,8 +131,9 @@ public class ReadOnlyCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("read-only")]
     [Description("put read only on user")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("target")] [Description("target member")] DiscordUser targetMember, [Parameter("reason")] [Description("reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -173,8 +168,6 @@ public class ReadOnlyCommand
     }
 }
 
-[Command("apps")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class AppsCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -186,8 +179,9 @@ public class AppsCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("apps")]
     [Description("get active applications")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -201,8 +195,6 @@ public class AppsCommand
     }
 }
 
-[Command("ann")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class AnnCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -214,8 +206,9 @@ public class AnnCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("ann")]
     [Description("post announcement in server")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("announcement")] [Description("announcement to post on the server")] string text)
     {
         Log.Information("AnnCommand");
@@ -229,8 +222,6 @@ public class AnnCommand
     }
 }
 
-[Command("save")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class SaveCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -242,8 +233,9 @@ public class SaveCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("save")]
     [Description("save server state")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -259,8 +251,6 @@ public class SaveCommand
     }
 }
 
-[Command("kick")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class KickCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -272,8 +262,9 @@ public class KickCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("kick")]
     [Description("kick user")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("target")] [Description("target member")] DiscordUser targetMember, [Parameter("reason")] [Description("reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
@@ -305,8 +296,6 @@ public class KickCommand
     }
 }
 
-[Command("ban")]
-[InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
 public class BanCommand
 {
     private readonly IServerDiscordApi _serverDiscordApi;
@@ -318,8 +307,9 @@ public class BanCommand
         _discordService = discordService;
     }
 
-    [DefaultGroupCommand]
+    [Command("ban")]
     [Description("ban user")]
+    [InteractionAllowedContexts(DiscordInteractionContextType.Guild)]
     public async Task ExecuteAsync(SlashCommandContext ctx, [Parameter("target")] [Description("target member")] DiscordUser targetMember, [Parameter("reason")] [Description("reason for this action")] string reason)
     {
         if (ctx.Channel != _discordService.CommandsChannel)
