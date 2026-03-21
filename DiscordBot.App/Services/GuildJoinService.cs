@@ -12,7 +12,7 @@ public class GuildJoinHandler(DiscordService discordService, IServerDiscordApi s
         if (e.Guild != discordService.Guild)
             return;
 
-        var status = await serverDiscordApi.GetAccountStatus(e.Member.Id);
+        var status = (await serverDiscordApi.GetAccountStatus(e.Member.Id)).Trim('"');
         Log.Information("GuildJoinHandler: account status for {UserId} is '{Status}'", e.Member.Id, status);
 
         switch (status)
