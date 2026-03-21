@@ -5,8 +5,7 @@ using Serilog;
 
 namespace DiscordBot.Services;
 
-public class GuildJoinHandler(DiscordService discordService, IServerDiscordApi serverDiscordApi)
-    : IEventHandler<GuildMemberAddedEventArgs>
+public class GuildJoinHandler(DiscordService discordService, IServerDiscordApi serverDiscordApi) : IEventHandler<GuildMemberAddedEventArgs>
 {
     public async Task HandleEventAsync(DiscordClient sender, GuildMemberAddedEventArgs e)
     {

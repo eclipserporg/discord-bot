@@ -9,7 +9,7 @@ using Serilog;
 
 namespace DiscordBot.Commands;
 
-public class VerifyCommand(IServerDiscordApi serverDiscordApi, DiscordService discordService)
+public class VerifyCommand(DiscordService discordService)
 {
     [Command("verify")]
     [Description("help user with verification.")]
