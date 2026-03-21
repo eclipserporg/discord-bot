@@ -86,21 +86,23 @@ public class DiscordController : ControllerBase
     public async Task PostGrantRole(ulong id, string role)
     {
         Log.Information("Post grantRole");
-        var member = await _discordService.Guild.GetMemberAsync(id);
 
-        if (member == null)
-            return;
-
-        var discordRole = role switch
+        try
         {
-            nameof(_discordService.MemberRole) => _discordService.MemberRole,
-            nameof(_discordService.CreatorRole) => _discordService.CreatorRole,
-            nameof(_discordService.BannedRole) => _discordService.BannedRole,
-            nameof(_discordService.ReadOnlyRole) => _discordService.ReadOnlyRole,
-            _ => throw new Exception("Invalid role name")
-        };
+            var member = await _discordService.Guild.GetMemberAsync(id);
 
-        await member.GrantRoleAsync(discordRole);
+            var discordRole = role switch
+            {
+                nameof(_discordService.MemberRole) => _discordService.MemberRole,
+                nameof(_discordService.CreatorRole) => _discordService.CreatorRole,
+                nameof(_discordService.BannedRole) => _discordService.BannedRole,
+                nameof(_discordService.ReadOnlyRole) => _discordService.ReadOnlyRole,
+                _ => throw new Exception("Invalid role name")
+            };
+
+            await member.GrantRoleAsync(discordRole);
+        }
+        catch (NotFoundException) { }
     }
 
     [HttpPost(Name = "revokeRole")]
