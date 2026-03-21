@@ -2,8 +2,8 @@ using DiscordBot.Commands;
 using DiscordBot.Settings;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Commands;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -15,8 +15,6 @@ public class DiscordService
     public DiscordGuild Guild { get; private set; }
     private readonly DiscordSettings _settings;
     private readonly ServerApiSettings _serverApiSettings;
-    private Func<DiscordClient, GuildMemberAddedEventArgs, Task>? _guildMemberAddedHandler;
-
     // Fix this
     public DiscordRole MemberRole { get; private set; }
     public DiscordRole ReadOnlyRole { get; private set; }
@@ -43,11 +41,6 @@ public class DiscordService
         _settings = discordSettings.Value;
     }
 
-    public void SetGuildMemberAddedHandler(Func<DiscordClient, GuildMemberAddedEventArgs, Task> handler)
-    {
-        _guildMemberAddedHandler = handler;
-    }
-
     public async Task Start()
     {
         var builder = DiscordClientBuilder.CreateDefault(
@@ -59,6 +52,7 @@ public class DiscordService
             services.AddRefitServices(_serverApiSettings);
             services.AddSingleton(this);
             services.AddSingleton<RestartState>();
+            services.AddEventHandler<GuildJoinHandler>();
         });
 
         builder.UseCommands((_, ext) =>
@@ -77,15 +71,6 @@ public class DiscordService
                 typeof(StopRestartCommand),
                 typeof(StartRestartCommand),
             ]);
-        });
-
-        builder.ConfigureEventHandlers(b =>
-        {
-            b.HandleGuildMemberAdded(async (client, e) =>
-            {
-                if (_guildMemberAddedHandler != null)
-                    await _guildMemberAddedHandler(client, e);
-            });
         });
 
         Client = builder.Build();

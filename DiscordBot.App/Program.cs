@@ -26,7 +26,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<DiscordService>();
 builder.Services.AddSingleton<RunnerService>();
-builder.Services.AddSingleton<GuildJoinService>();
 builder.Services.AddHostedService(provider => provider.GetService<RunnerService>());
 
 builder.Services.AddAuthentication("BasicAuthentication")
@@ -43,8 +42,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.Services.GetService<GuildJoinService>();
-await app.Services.GetService<DiscordService>().Start();
+await app.Services.GetRequiredService<DiscordService>().Start();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
