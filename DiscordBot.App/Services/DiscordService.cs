@@ -3,7 +3,6 @@ using DiscordBot.Settings;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Commands;
-using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -53,8 +52,9 @@ public class DiscordService
             services.AddRefitServices(_serverApiSettings);
             services.AddSingleton(this);
             services.AddSingleton<RestartState>();
-            services.AddScoped<IEventHandler<GuildMemberAddedEventArgs>, GuildJoinHandler>();
         });
+
+        builder.ConfigureEventHandlers(b => b.AddEventHandlers<GuildJoinHandler>());
 
         builder.UseCommands((_, ext) =>
         {
