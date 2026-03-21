@@ -45,7 +45,7 @@ public class DiscordService
     {
         var builder = DiscordClientBuilder.CreateDefault(
             _settings.Token,
-            DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents | DiscordIntents.DirectMessages);
+            DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents | DiscordIntents.DirectMessages | DiscordIntents.GuildMembers);
 
         builder.ConfigureServices(services =>
         {
