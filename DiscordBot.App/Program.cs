@@ -43,6 +43,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.Services.GetService<GuildJoinService>();
 await app.Services.GetService<DiscordService>().Start();
 
 app.UseHttpsRedirection();
