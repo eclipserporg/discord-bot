@@ -4,8 +4,6 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Commands;
-using DSharpPlus.Commands.Trees;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -63,20 +61,22 @@ public class DiscordService
             services.AddSingleton<RestartState>();
         });
 
-        builder.UseCommands((sp, ext) =>
+        builder.UseCommands((_, ext) =>
         {
-            ext.AddCommand(CommandBuilder.From(typeof(AuthenticationCommands).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AuthenticationCommands>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(VerifyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<VerifyCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(PingServerCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<PingServerCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(RemoveReadOnlyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<RemoveReadOnlyCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(ReadOnlyCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<ReadOnlyCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(AppsCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AppsCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(AnnCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<AnnCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(SaveCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<SaveCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(KickCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<KickCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(BanCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<BanCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(StopRestartCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<StopRestartCommand>(sp)));
-            ext.AddCommand(CommandBuilder.From(typeof(StartRestartCommand).GetMethod("ExecuteAsync")!, ActivatorUtilities.CreateInstance<StartRestartCommand>(sp)));
+            ext.AddCommands([
+                typeof(AuthenticationCommands),
+                typeof(VerifyCommand),
+                typeof(PingServerCommand),
+                typeof(RemoveReadOnlyCommand),
+                typeof(ReadOnlyCommand),
+                typeof(AppsCommand),
+                typeof(AnnCommand),
+                typeof(SaveCommand),
+                typeof(KickCommand),
+                typeof(BanCommand),
+                typeof(StopRestartCommand),
+                typeof(StartRestartCommand),
+            ]);
         });
 
         builder.ConfigureEventHandlers(b =>
