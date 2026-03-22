@@ -132,6 +132,7 @@ public class DiscordController : ControllerBase
     public async Task PostUpdateMemberRoles(DiscordMemberRolesDto memberRoles)
     {
         Log.Information("Post updateMemberRoles");
+
         await foreach (var discordMember in _discordService.Guild.GetAllMembersAsync())
         {
             var isVIP = memberRoles.MemberRoleIdsVIP.TryGetValue(discordMember.Id, out var roleIdVIP);
@@ -166,7 +167,7 @@ public class DiscordController : ControllerBase
                 await discordMember.GrantRoleAsync(roleDonator);
             }
 
-            if (isContentCreator && !discordMember.Roles.Any((role) => role.Id == _discordService.CreatorRole.Id))
+            if (isContentCreator && !discordMember.Roles.Any((discordRole) => discordRole.Id == _discordService.CreatorRole.Id))
             {
                 await discordMember.GrantRoleAsync(_discordService.CreatorRole);
             }
