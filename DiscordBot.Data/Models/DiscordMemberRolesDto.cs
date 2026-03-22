@@ -1,35 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DiscordBot.Data.Models;
+﻿namespace DiscordBot.Data.Models;
 
 public class DiscordMemberRolesDto
 {
     /// <summary>
-    /// A collection of VIP Discord role ids.
+    /// A collection of VIP role ids.
     /// </summary>
-    public HashSet<ulong> RolesVIP { get; set; } = new();
+    public HashSet<ulong> RoleIdsVIP { get; set; } = new();
 
     /// <summary>
-    /// A collection of VIP Discord member ids and their role ids.
+    /// A collection of donator role ids.
     /// </summary>
-    public Dictionary<ulong, ulong> MemberRolesVIP { get; set; } = new();
+    public HashSet<ulong> RoleIdsDonator { get; set; } = new();
 
     /// <summary>
-    /// A collection of donator Discord role ids.
-    /// </summary>
-    public HashSet<ulong> RolesDonator { get; set; } = new();
+    /// A collection of member and their VIP role ids.
+    /// </summary
+    public Dictionary<ulong, ulong> MemberRoleIdsVIP { get; set; } = new();
 
     /// <summary>
-    /// A collection of donator Discord member ids and their role ids.
+    /// A collection of member and their donator role ids.
     /// </summary>
-    public Dictionary<ulong, ulong> MemberRolesDonator { get; set; } = new();
+    public Dictionary<ulong, ulong> MemberRoleIdsDonator { get; set; } = new();
 
     /// <summary>
-    /// A collection of content creator Discord member ids.
+    /// A collection of content creator member ids.
     /// </summary
     public HashSet<ulong> ContentCreatorMemberIds { get; set; } = new();
 }

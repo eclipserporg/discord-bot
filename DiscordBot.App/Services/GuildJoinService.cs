@@ -13,7 +13,6 @@ public class GuildJoinHandler(DiscordService discordService, IServerDiscordApi s
             return;
 
         var status = (await serverDiscordApi.GetAccountStatus(e.Member.Id)).Trim('"');
-        Log.Information("GuildJoinHandler: account status for {UserId} is '{Status}'", e.Member.Id, status);
 
         switch (status)
         {
@@ -26,7 +25,7 @@ public class GuildJoinHandler(DiscordService discordService, IServerDiscordApi s
                 Log.Information("GuildJoinHandler: granted MemberRole to {UserId}", e.Member.Id);
                 break;
             default:
-                Log.Information("GuildJoinHandler: no role granted, unrecognized status '{Status}'", status);
+                Log.Information("GuildJoinHandler: no role granted");
                 break;
         }
     }
